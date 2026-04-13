@@ -1,0 +1,9 @@
+{
+  "detail": {
+    "code": "INVALID_INPUT",
+    "message": "Invalid input",
+    "details": {
+      "field": "code"
+    }
+  }
+}

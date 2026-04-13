@@ -1,0 +1,533 @@
+openapi: 3.0.3
+info:
+  title: AI House Shared API Contract
+  version: 1.1.0
+  description: Shared contract synchronized from docs/README_backend.md and docs/frontend_api_map.md.
+servers:
+  - url: http://127.0.0.1:5000
+
+tags:
+  - name: auth
+  - name: user
+  - name: house
+  - name: favorite
+  - name: history
+  - name: chat
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Envelope:
+      type: object
+      required: [code, message, data]
+      properties:
+        code:
+          type: integer
+          description: 1 means business success.
+          example: 1
+        message:
+          type: string
+          example: ok
+        data:
+          type: object
+          nullable: true
+
+    LoginRequest:
+      type: object
+      required: [user_id]
+      properties:
+        user_id:
+          type: string
+
+    WechatLoginRequest:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+          description: Returned by wx.login().
+
+    TokenData:
+      type: object
+      required: [token]
+      properties:
+        token:
+          type: string
+
+    ChatSendRequest:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+
+    HouseSearchRequest:
+      type: object
+      properties:
+        area:
+          type: string
+        min_price:
+          type: integer
+        max_price:
+          type: integer
+        type:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        keyword:
+          type: string
+        page:
+          type: integer
+          minimum: 1
+          default: 1
+        limit:
+          type: integer
+          minimum: 1
+          default: 20
+      additionalProperties: false
+
+    HouseIdRequest:
+      type: object
+      required: [house_id]
+      properties:
+        house_id:
+          type: string
+
+    HouseStatusRequest:
+      type: object
+      required: [house_id, status]
+      properties:
+        house_id:
+          type: string
+        status:
+          type: integer
+          description: 1=待租, 2=已租, 0=下架
+
+    HouseListRequest:
+      type: object
+      properties:
+        status:
+          type: integer
+          nullable: true
+          description: 1=待租, 2=已租, -1=已删除, null=全部
+
+    HouseCreateRequest:
+      type: object
+      required: [area, location, type, price, status]
+      properties:
+        area:
+          type: string
+        location:
+          type: string
+        type:
+          type: string
+        price:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            type: string
+        status:
+          type: integer
+
+    HouseUpdateRequest:
+      type: object
+      required: [house_id]
+      properties:
+        house_id:
+          type: string
+        area:
+          type: string
+        location:
+          type: string
+        type:
+          type: string
+        price:
+          type: integer
+        tags:
+          type: array
+          items:
+            type: string
+        images:
+          type: array
+          items:
+            type: string
+        status:
+          type: integer
+
+    LimitRequest:
+      type: object
+      properties:
+        limit:
+          type: integer
+          default: 50
+
+    HistoryAddRequest:
+      type: object
+      required: [house_id, source]
+      properties:
+        house_id:
+          type: string
+        source:
+          type: string
+          enum: [discover, ai, detail]
+
+    SwitchRoleRequest:
+      type: object
+      required: [role]
+      properties:
+        role:
+          type: string
+          enum: [tenant, landlord]
+
+security:
+  - bearerAuth: []
+
+paths:
+  /api/v1/auth/login:
+    post:
+      tags: [auth]
+      summary: Generic login for development
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+
+  /api/v1/auth/wechat_login:
+    post:
+      tags: [auth]
+      summary: WeChat silent login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WechatLoginRequest'
+      responses:
+        '200':
+          description: Login success
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/TokenData'
+
+  /api/v1/chat/send:
+    post:
+      tags: [chat]
+      summary: Send message to AI chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatSendRequest'
+      responses:
+        '200':
+          description: Chat response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+
+  /api/v1/house/search:
+    post:
+      tags: [house]
+      summary: Search public houses
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HouseSearchRequest'
+      responses:
+        '200':
+          description: Search list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+
+  /api/v1/house/public_detail:
+    post:
+      tags: [house]
+      summary: Get public house detail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HouseIdRequest'
+      responses:
+        '200':
+          description: House detail with favorite state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+
+  /api/v1/house/create:
+    post:
+      tags: [house]
+      summary: Create house (landlord)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HouseCreateRequest'
+      responses:
+        '200':
+          description: Create success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+
+  /api/v1/house/list:
+    post:
+      tags: [house]
+      summary: List my houses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HouseListRequest'
+      responses:
+        '200':
+          description: List success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+
+  /api/v1/house/detail:
+    post:
+      tags: [house]
+      summary: Get my house detail
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HouseIdRequest'
+      responses:
+        '200':
+          description: Detail success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+
+  /api/v1/house/update:
+    post:
+      tags: [house]
+      summary: Update house
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HouseUpdateRequest'
+      responses:
+        '200':
+          description: Update success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+
+  /api/v1/house/status:
+    post:
+      tags: [house]
+      summary: Update house status
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HouseStatusRequest'
+      responses:
+        '200':
+          description: Status updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+
+  /api/v1/house/delete:
+    post:
+      tags: [house]
+      summary: Delete house
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HouseIdRequest'
+      responses:
+        '200':
+          description: Delete success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+
+  /api/v1/favorite/add:
+    post:
+      tags: [favorite]
+      summary: Add favorite
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HouseIdRequest'
+      responses:
+        '200':
+          description: Add success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+
+  /api/v1/favorite/remove:
+    post:
+      tags: [favorite]
+      summary: Remove favorite
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HouseIdRequest'
+      responses:
+        '200':
+          description: Remove success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+
+  /api/v1/favorite/list:
+    post:
+      tags: [favorite]
+      summary: List favorites
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LimitRequest'
+      responses:
+        '200':
+          description: List success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+
+  /api/v1/history/add:
+    post:
+      tags: [history]
+      summary: Add browse history
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HistoryAddRequest'
+      responses:
+        '200':
+          description: Add success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+
+  /api/v1/history/list:
+    post:
+      tags: [history]
+      summary: List browse history
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LimitRequest'
+      responses:
+        '200':
+          description: List success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+
+  /api/v1/user/profile:
+    post:
+      tags: [user]
+      summary: Get current user profile
+      responses:
+        '200':
+          description: Profile success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+
+  /api/v1/user/dashboard:
+    post:
+      tags: [user]
+      summary: Get dashboard stats
+      responses:
+        '200':
+          description: Dashboard success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
+
+  /api/v1/user/switch_role:
+    post:
+      tags: [user]
+      summary: Switch current user role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SwitchRoleRequest'
+      responses:
+        '200':
+          description: Role switched
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Envelope'
