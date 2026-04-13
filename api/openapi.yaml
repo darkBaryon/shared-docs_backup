@@ -27,8 +27,8 @@ components:
       properties:
         code:
           type: integer
-          description: 1 means business success.
-          example: 1
+          description: 0 means business success.
+          example: 0
         message:
           type: string
           example: ok
@@ -76,6 +76,7 @@ components:
           type: integer
         type:
           type: string
+          description: Legacy-compatible display type filter.
         tags:
           type: array
           items:
@@ -119,6 +120,7 @@ components:
 
     HouseCreateRequest:
       type: object
+      description: Current landlord write model is still legacy and will be migrated later.
       required: [area, location, type, price, status]
       properties:
         area:
@@ -142,6 +144,7 @@ components:
 
     HouseUpdateRequest:
       type: object
+      description: Current landlord write model is still legacy and will be migrated later.
       required: [house_id]
       properties:
         house_id:
@@ -291,6 +294,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Envelope'
+              example:
+                code: 0
+                message: ok
+                data:
+                  house:
+                    house_id: 661a0c6af8d56b3a1a4b2024
+                    area: 南山
+                    location: 科技园
+                    type: 2室1厅
+                    price: 4200
+                    rent_mode: whole
+                    room_count: 2
+                    hall_count: 1
+                    bathroom_count: 1
+                    payment_cycle: monthly
+                    near_subway: true
+                    walk_to_subway_min: 8
+                    pet_friendly: false
+                    has_elevator: true
+                    cooking_allowed: true
+                    furnished_level: full
+                    tags: [近地铁, 拎包入住]
+                    images: []
+                    status: 1
+                    created_at: 1775451571
+                    updated_at: 1775451661
+                  is_favorited: true
 
   /api/v1/house/create:
     post:

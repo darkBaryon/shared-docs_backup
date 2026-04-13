@@ -19,6 +19,6 @@
 1. `api/openapi.yaml`
 2. `api/error-codes.md`
 3. `schemas/user.md`、`schemas/auth.md`、`schemas/house.md`、`schemas/dashboard.md`
-4. `contracts/auth-flow.md`、`contracts/frontend-endpoint-map.md`
+4. `contracts/auth-flow.md`、`contracts/frontend-endpoint-map.md`、`contracts/backend-sync-changelog.md`
 5. `decisions/`
 6. `examples/`

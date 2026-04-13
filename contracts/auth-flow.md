@@ -11,5 +11,5 @@
 ## 失败处理约定
 
 1. 若 HTTP 非 2xx，前端优先读取 `detail`。
-2. 若 HTTP 2xx 但 `code != 1`，按业务失败处理并提示 `message`。
+2. 若 HTTP 2xx 但 `code != 0`，按业务失败处理并提示 `message`。
 3. token 失效时，清理本地 token 并重新执行登录流程。

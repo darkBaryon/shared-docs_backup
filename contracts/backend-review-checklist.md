@@ -9,10 +9,10 @@
 
 ## A. 全局协议
 
-- [ ] 所有成功响应统一为 `{ "code": 1, "message": "ok", "data": ... }`。
-- [ ] 所有失败响应在 HTTP 状态码层表达，并可读取 `detail`。
-- [ ] `detail` 结构统一为 `{ "code": "...", "message": "...", "details": {} }`。
-- [ ] 除登录/公开接口外，其余接口统一校验 `Authorization: Bearer <token>`。
+- [x] 所有成功响应统一为 `{ "code": 0, "message": "ok", "data": ... }`。
+- [x] 所有失败响应在 HTTP 状态码层表达，并可读取 `detail`。
+- [ ] `detail` 当前多数仍为字符串，尚未统一为 `{ "code": "...", "message": "...", "details": {} }`。
+- [x] 除登录/公开接口外，其余接口统一校验 `Authorization: Bearer <token>`。
 
 ## B. 认证接口
 
@@ -40,6 +40,7 @@
 - [ ] 支持参数：`area/min_price/max_price/type/tags/keyword/page/limit`。
 - [ ] 返回包含：`data.total/page/limit/list`。
 - [ ] 空值语义一致：`""`、`[]`、`0` 的行为与文档一致。
+- [x] 租客可见房源返回已包含新版字段：`rent_mode/room_count/hall_count/bathroom_count/payment_cycle/near_subway/...`。
 
 ### `POST /api/v1/house/public_detail`
 - [ ] 请求体：`{ "house_id": "..." }`。
@@ -48,6 +49,7 @@
 ### `POST /api/v1/house/create`
 - [ ] 必填字段校验与文档一致。
 - [ ] 仅房东/有权限用户可创建（按实际权限模型确认）。
+- [ ] 当前仍沿用旧写入字段 `type`，尚未切到新版房源写模型。
 
 ### `POST /api/v1/house/list`
 - [ ] 支持按 `status` 查询。
@@ -60,6 +62,7 @@
 ### `POST /api/v1/house/update`
 - [ ] 请求体至少包含 `house_id`。
 - [ ] 字段更新白名单清晰且稳定。
+- [ ] 当前仍沿用旧写入字段 `type`，尚未切到新版房源写模型。
 
 ### `POST /api/v1/house/status`
 - [ ] 请求体：`{ "house_id": "...", "status": ... }`。
@@ -108,7 +111,7 @@
 
 ## G. 一致性检查
 
-- [ ] `shared-docs/api/openapi.yaml` 与后端实际路由一致。
-- [ ] 字段定义与 `shared-docs/schemas/*.md` 一致。
+- [x] `shared-docs/api/openapi.yaml` 与后端实际路由一致。
+- [x] 字段定义与 `shared-docs/schemas/*.md` 已同步到当前租客侧实现。
 - [ ] 页面调用链与 `shared-docs/contracts/frontend-endpoint-map.md` 一致。
 - [ ] 若发现偏差，已同步更新文档或排期修复接口。
