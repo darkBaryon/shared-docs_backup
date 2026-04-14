@@ -7,8 +7,6 @@
 - `api/`：接口定义与错误约定。
 - `schemas/`：核心对象字段定义。
 - `contracts/`：页面到接口的流程契约。
-- `decisions/`：关键约定的决策记录（ADR）。
-- `examples/`：请求与响应样例。
 
 ## Source of Truth
 
@@ -20,5 +18,3 @@
 2. `api/error-codes.md`
 3. `schemas/user.md`、`schemas/auth.md`、`schemas/house.md`、`schemas/dashboard.md`
 4. `contracts/auth-flow.md`、`contracts/frontend-endpoint-map.md`、`contracts/backend-sync-changelog.md`
-5. `decisions/`
-6. `examples/`
