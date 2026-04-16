@@ -80,6 +80,52 @@ components:
         message:
           type: string
 
+    ChatUserMessage:
+      type: object
+      required: [text, timestamp]
+      properties:
+        text:
+          type: string
+        timestamp:
+          type: string
+          description: HH:MM:SS
+
+    ChatAiMessage:
+      type: object
+      required: [sentences, timestamp]
+      properties:
+        sentences:
+          type: array
+          description: Multi-sentence payload for frontend rendering.
+          items:
+            type: string
+        model:
+          type: string
+          nullable: true
+        ai_tone_score:
+          type: number
+          format: float
+          nullable: true
+        quality_score:
+          type: number
+          format: float
+          nullable: true
+        raw_model_output:
+          type: string
+          nullable: true
+        timestamp:
+          type: string
+          description: HH:MM:SS
+
+    ChatSendResponseData:
+      type: object
+      required: [user, ai]
+      properties:
+        user:
+          $ref: '#/components/schemas/ChatUserMessage'
+        ai:
+          $ref: '#/components/schemas/ChatAiMessage'
+
     HouseSearchRequest:
       type: object
       properties:
@@ -279,7 +325,29 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Envelope'
+                allOf:
+                  - $ref: '#/components/schemas/Envelope'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/ChatSendResponseData'
+              example:
+                code: 0
+                message: ok
+                data:
+                  user:
+                    text: 南山 5000
+                    timestamp: "17:08:52"
+                  ai:
+                    sentences:
+                      - 南山有5套符合的房源，我给你列清楚：
+                      - 1. 南头城花园·南头古城｜1室0厅｜1500元/月
+                      - 哪套想先了解？我可以发实拍图或约看～
+                    model: qwen-plus
+                    ai_tone_score: null
+                    quality_score: null
+                    raw_model_output: "{\"plan\":{...}}"
+                    timestamp: "17:08:52"
 
   /api/v1/house/search:
     post:

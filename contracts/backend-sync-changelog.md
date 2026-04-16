@@ -2,6 +2,20 @@
 
 给前端联调用的本轮后端变更记录。
 
+## 2026-04-16
+
+### AI Chat
+
+- `POST /api/v1/chat/send` 响应结构升级为多句输出：
+  - `data.ai.sentences: string[]`（前端按分句渲染）
+- 共享契约已移除旧的单字符串 `data.ai.text`。
+- 同时补充可观测字段（可选）：
+  - `data.ai.model`
+  - `data.ai.ai_tone_score`
+  - `data.ai.quality_score`
+  - `data.ai.raw_model_output`
+- `data.user.text` / `data.user.timestamp`、`data.ai.timestamp` 保持不变。
+
 ## 2026-04-13
 
 ### 全局协议

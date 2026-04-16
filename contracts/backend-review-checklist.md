@@ -31,6 +31,7 @@
 ### `POST /api/v1/chat/send`
 - [ ] 请求体：`{ "message": "..." }`。
 - [ ] 成功返回 `data.user` 与 `data.ai`。
+- [ ] `data.ai.sentences` 为数组（前端按分句渲染）。
 - [ ] 无 token 时返回未授权错误。
 
 ## D. 房源接口
