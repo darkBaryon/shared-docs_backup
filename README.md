@@ -1,12 +1,12 @@
 # shared-docs
 
-前后端共享契约文档仓库。这里维护 API、字段结构、交互流程与架构决策，是联调唯一参考源。
+前后端共享文档仓库。这里维护 API、变更记录、数据库结构与后端实现约定，是联调唯一参考源。
 
 ## 目录说明
 
-- `api/`：接口定义与错误约定。
-- `schemas/`：核心对象字段定义。
-- `contracts/`：页面到接口的流程契约。
+- `api/`：接口文档、接口映射、前后端联调说明。
+- `changes/`：口径调整、同步记录、评审检查记录。
+- `schema/`：数据库设计文档与后端 CRUD 实现约定。
 
 ## Source of Truth
 
@@ -16,5 +16,7 @@
 
 1. `api/openapi.yaml`
 2. `api/error-codes.md`
-3. `schemas/user.md`、`schemas/auth.md`、`schemas/house.md`、`schemas/dashboard.md`
-4. `contracts/auth-flow.md`、`contracts/frontend-endpoint-map.md`、`contracts/backend-sync-changelog.md`
+3. `api/auth-flow.md`、`api/frontend-endpoint-map.md`
+4. `changes/backend-sync-changelog.md`
+5. `schema/db-design/v4/README.md`
+6. `schema/backend-crud.md`

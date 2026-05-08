@@ -113,6 +113,6 @@
 ## G. 一致性检查
 
 - [x] `shared-docs/api/openapi.yaml` 与后端实际路由一致。
-- [x] 字段定义与 `shared-docs/schemas/*.md` 已同步到当前租客侧实现。
-- [ ] 页面调用链与 `shared-docs/contracts/frontend-endpoint-map.md` 一致。
+- [x] 字段定义与 `shared-docs/schema/db-design/**/*.md` 已同步到当前租客侧实现。
+- [ ] 页面调用链与 `shared-docs/api/frontend-endpoint-map.md` 一致。
 - [ ] 若发现偏差，已同步更新文档或排期修复接口。

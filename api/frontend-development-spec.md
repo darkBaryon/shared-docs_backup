@@ -175,5 +175,5 @@ src/
 - 接口路径、认证方式、默认值语义变化时，必须先更新共享文档，再改代码
 - 前端实现规范以本文件为准，接口真值来源为：
   - `shared-docs/api/`
-  - `shared-docs/schemas/`
-  - `shared-docs/contracts/`
+  - `shared-docs/schema/`
+  - `shared-docs/changes/`
