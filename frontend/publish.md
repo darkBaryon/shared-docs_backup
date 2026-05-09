@@ -7,7 +7,7 @@
 - 发房端后端第一期 HMD 链路已通过真实服务联调。
 - 前端可以开始接入 HMD 录入、详情、列表、更新和房态流转。
 - 当前接口已经走 Redis Session 鉴权，联调时需要 `Authorization: Bearer <token>`。
-- HPD 仍是 no-op，暂时不要把 HMD 结果当成小程序展示层数据。
+- HPD 小程序 projector 已接入，暂时仍不要把 HMD 结果当成小程序展示层 API 数据。
 
 ## 约定
 

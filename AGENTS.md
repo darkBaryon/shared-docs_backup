@@ -20,17 +20,17 @@
 - `agents/`：不同端开发 Agent 的工作规则。
 - `overview/`：项目背景、系统组成、术语。
 - `product/`：产品范围和业务边界。
-- `api/`：接口契约、接口说明、错误码、认证流程。
+- `api/`：各端接口契约、错误码、认证流程。
 - `schema/`：数据库设计、字段约束、索引、后端 CRUD。
 - `backend/`：Go 后端工程约定。
-- `frontend/`：前端工程约定和接口映射。
+- `frontend/`：前端工程约定和端侧协作说明。
 - `flows/`：跨模块业务流程。
 - `changes/`：变更记录、迁移进度、架构决策。
 
 ## 契约优先级
 
-1. API 路径、方法、请求响应：以 `api/openapi.yaml` 为准。
-2. 接口补充说明与映射：以 `api/` 下文档为准，并与 OpenAPI 保持同步。
+1. API 路径、方法、请求响应：以 `api/` 下对应前端端侧 API 文档为准。
+2. 接口通用命名规则：以 `overview/project-spec.md` 为准。
 3. 数据库结构、枚举、索引、后端 CRUD：以 `schema/` 为准。
 4. 工程边界和实现约定：以 `backend/`、`frontend/`、`agents/` 为准。
 5. 历史调整说明与同步记录：以 `changes/` 为准。
@@ -40,9 +40,7 @@
 1. 文件名使用英文 kebab-case，正文可以使用中文。
 2. `README.md` 只做总入口，不承载大量正文。
 3. 每个顶层目录应有 `index.md`。
-4. 规范类文档是当前事实源；接口变更必须同时更新：
-   - `api/openapi.yaml`
-   - `api/` 下对应接口说明文档
+4. 规范类文档是当前事实源；接口变更必须更新 `api/` 下对应前端的端侧 API 文档。
 5. 数据库变更必须同时更新：
    - `schema/db-design/`
    - `schema/backend-crud/`
@@ -54,7 +52,7 @@
 ## 交付检查清单
 
 - [ ] 新增或迁移文件后，相关 `index.md` 已更新
-- [ ] API 变更已同步 `api/openapi.yaml`
+- [ ] API 变更已同步对应前端的端侧 API 文档
 - [ ] schema 变更已同步数据库设计与 CRUD 文档
 - [ ] 架构口径变更已同步 `changes/decisions/`
 - [ ] 旧路径引用已清理

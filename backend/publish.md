@@ -5,20 +5,20 @@
 ```text
 handler/v1/publish
   -> service/publish/PublishService
-    -> service/publish/hmd.Service 写 HMD，并返回 HmdMutationResult
-    -> service/publish/hpd.Service.Apply(changes)
+    -> service/hmd.Service 写 HMD，并返回 HmdMutationResult
+    -> service/hpd.Service.Apply(changes)
     -> repository/hmd
 ```
 
 ## 当前阶段
 
-- HMD 子 service 已拆到 `internal/service/publish/hmd`。
-- HPD 子 service 已拆到 `internal/service/publish/hpd`。
+- HMD 子 service 已拆到 `internal/service/hmd`。
+- HPD 子 service 已拆到 `internal/service/hpd`。
 - PublishService 是 handler 的唯一入口。
-- `internal/service/publish` 顶层只保留 facade 和对外输入类型别名，不承载 HMD 具体实现。
+- `internal/service/publish` 顶层只保留 应用服务 和对外输入类型别名，不承载 HMD 具体实现。
 - HMD 写操作返回 `Entity + Changes`。
 - PublishService 统一把 changes 交给 `hpd.Service.Apply`。
-- HPD 当前 `Apply` 是 no-op 预留点，后续接入 projector 或 outbox worker 复用的投影逻辑。
+- HPD 已接入第一期小程序 projector，后续 outbox worker 复用同一套投影逻辑。
 - Publish 第一阶段 HMD 链路已完成真实服务联调，route / middleware / Redis session / handler / service / Mongo 落库均已验证通过。
 
 ## Handler 层
@@ -52,22 +52,37 @@ internal/handler/v1/publish/
 internal/service/publish/
   service.go
   types.go
-  hmd/
-    hmd_service.go
-    hmd_*.go
-    dto_*.go
-    errors.go
-    mapper.go
-  hpd/
-    service.go
+  dependencies.go
+  centralized_project.go
+  building.go
+  room_type.go
+  centralized_room.go
+  decentralized_community.go
+  decentralized_room.go
+
+internal/service/hmd/
+  hmd_service.go
+  hmd_*.go
+  dto_*.go
+  errors.go
+  mapper.go
+
+internal/service/hpd/
+  service.go
+  miniapp_projector.go
+  miniapp_mapper.go
+  miniapp_fanout.go
+  errors.go
 ```
 
 职责：
 
-- `publish/service.go`：只做 facade 编排，handler 只依赖这一层。
-- `publish/types.go`：保留 facade 对外输入类型，避免 handler 直接依赖 HMD 子包。
-- `publish/hmd`：负责 HMD 主数据写入、依赖校验、重复校验、mutation changes 和 service 错误语义。
-- `publish/hpd`：负责展示层同步入口，当前为 no-op。
+- `publish/service.go`：只做 应用服务 编排，handler 只依赖这一层。
+- `publish/types.go`：保留 应用服务 对外输入类型，避免 handler 直接依赖 HMD 子包。
+- `publish/{object}.go`：按业务对象放 publish action，避免 `service.go` 变成透传总线。
+- `publish/dependencies.go`：放 publish 入口需要的窄接口。
+- `service/hmd`：负责 HMD 主数据写入、依赖校验、重复校验、mutation changes 和 service 错误语义。
+- `service/hpd`：负责展示层同步入口和 HPD projector，不放在 publish 目录下。
 
 错误约束：
 
@@ -97,8 +112,8 @@ HmdMutationResult
 
 publish 当前按分层验证：
 
-1. `internal/service/publish/hmd`：Mongo 集成测试，验证 HMD 子能力的数据写入、查询、列表、更新、状态更新、唯一性、归属关系和字段约束。
-2. `internal/service/publish`：facade 单元测试，验证 HMD 写成功后会调用 HPD `Apply(changes)`，HMD 失败时不调用，读操作不调用，Apply 错误会向上返回。
+1. `internal/service/hmd`：Mongo 集成测试，验证 HMD 子能力的数据写入、查询、列表、更新、状态更新、唯一性、归属关系和字段约束。
+2. `internal/service/publish`：应用服务 单元测试，验证 HMD 写成功后会调用 HPD `Apply(changes)`，HMD 失败时不调用，读操作不调用，Apply 错误会向上返回。
 3. `internal/handler/v1/publish`：已补基础 HTTP binding 测试，重点覆盖 JSON 绑定、ObjectID 解析、参数错误和 service errcode 响应。
 4. 真实服务 curl 联调：已验证 route、middleware、wire、config 和依赖装配。
 
@@ -109,7 +124,7 @@ PUBLISH_HMD_INTEGRATION=1 \
 PUBLISH_HMD_TEST_DB=rent-house \
 PUBLISH_HMD_TEST_AUTH_SOURCE=rent-house \
 PUBLISH_HMD_TEST_ALLOW_RENT_HOUSE=1 \
-go test ./internal/service/publish/hmd -run Integration -count=1 -v
+go test ./internal/service/hmd -run Integration -count=1 -v
 ```
 
 说明：
@@ -148,6 +163,6 @@ go test ./internal/service/publish/hmd -run Integration -count=1 -v
 
 - 发房系统不是 HMD CRUD 直通层。
 - handler 不直接调用 HMD 子 service 或 repository。
-- `publish/hmd.Service` 不直接依赖 HPD。
+- `hmd.Service` 不直接依赖 HPD。
 - PublishService 只负责统一派发 changes，不写具体投影逻辑。
 - 分散式房间当前没有房型模型，不使用 `room_type_id`。

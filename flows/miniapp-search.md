@@ -21,8 +21,8 @@ HPD 未完成前，不应让小程序直接依赖 HMD 主数据结构。
 ```text
 发房端 publish API
   -> PublishService
-    -> publish/hmd.Service 写 HMD
-    -> publish/hpd.Service.Apply(changes)
+    -> hmd.Service 写 HMD
+    -> hpd.Service.Apply(changes)
       -> MiniappProjector
         -> 生成 hs_hpd_listing
         -> 生成 hs_hpd_miniapp_listing

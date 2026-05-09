@@ -72,7 +72,7 @@
 当前 `PublishService` 已经在 HMD 写操作成功后调用：
 
 ```text
-publish/hpd.Service.Apply(changes)
+hpd.Service.Apply(changes)
 ```
 
 第一期 HPD 要把这个 no-op 改成真实 projector 调用。
@@ -81,9 +81,9 @@ publish/hpd.Service.Apply(changes)
 
 ```text
 PublishService
-  -> publish/hmd.Service 写 HMD
+  -> hmd.Service 写 HMD
   -> HmdMutationResult{Entity, Changes}
-  -> publish/hpd.Service.Apply(changes)
+  -> hpd.Service.Apply(changes)
     -> MiniappProjector
       -> 读取 HMD 当前源数据
       -> 生成 / 更新 hs_hpd_listing
@@ -113,7 +113,7 @@ HMD 写事务
 
 Worker
   -> 读取 outbox event
-  -> publish/hpd.Service.Apply(changes)
+  -> hpd.Service.Apply(changes)
 ```
 
 ## 4. Projector 刷新规则
@@ -284,7 +284,7 @@ internal/repository/hpd/
 ### 7.3 Service
 
 ```text
-internal/service/publish/hpd/
+internal/service/hpd/
   service.go
   miniapp_projector.go
   miniapp_mapper.go
@@ -318,7 +318,7 @@ internal/service/miniapp/
 
 原因：
 
-- `publish/hpd` 负责投影写入。
+- `hpd` 负责投影写入。
 - `miniapp` service 负责小程序读查询。
 - 不把小程序读逻辑塞进 publish service。
 
@@ -406,7 +406,7 @@ is_online_1_weight_score_-1_updated_at_-1
 3. 补 `model/hpd*`。
 4. 补 `repository/hpd`。
 5. 补 HPD 索引脚本或初始化逻辑。
-6. 实现 `publish/hpd.Service.Apply(changes)` 的 miniapp projector。
+6. 实现 `hpd.Service.Apply(changes)` 的 miniapp projector。
 7. 实现 `service/miniapp` 和 `handler/v1/miniapp`。
 8. 跑 repository / projector / handler 测试。
 9. 用发房端创建 HMD，再用小程序接口查询 HPD 做 E2E。
@@ -414,7 +414,7 @@ is_online_1_weight_score_-1_updated_at_-1
 ## 11. 关键约束
 
 - 小程序只读 HPD，不读 HMD。
-- `publish/hmd.Service` 不直接依赖 HPD。
+- `hmd.Service` 不直接依赖 HPD。
 - projector 根据 HMD 当前源数据重建 HPD，不接收 handler 拼好的展示字段。
 - 第一阶段不做集中式房型发布源。
 - 第一阶段不做 outbox，先保证同步 projector 跑通。

@@ -14,4 +14,4 @@
 - 发房系统不是 HMD 表单直通层；录入动作后续会同时影响 HMD 和 HPD。
 - 当前分散式房间没有房型模型，不传 `room_type_id`。
 - 表单枚举值以 schema 和 API 文档为准，不在前端自造值。
-- 新增发房接口前，先更新 `api/publish.md` 和 `api/openapi.yaml`。
+- 新增发房接口前，先更新发房系统对应 API 文档。

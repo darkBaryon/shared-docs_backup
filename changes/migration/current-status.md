@@ -117,9 +117,9 @@
 
 已完成：
 
-- `internal/service/publish` 顶层已收敛为 facade
-- HMD 子域已拆到 `internal/service/publish/hmd`
-- HPD 子域已拆到 `internal/service/publish/hpd`
+- `internal/service/publish` 顶层已收敛为 应用服务
+- HMD 子域已拆到 `internal/service/hmd`
+- HPD 子域已拆到 `internal/service/hpd`
 - `PublishService` 已作为 handler 入口
 - `hmd.Service` 已作为 HMD 子 service
 - `hpd.Service` 已作为 no-op 预留点
@@ -132,8 +132,8 @@
 - publish service 已返回明确 `errcode`，handler 不再用字符串归类 service 错误
 - publish 路由已注册到受保护 `/api/v1` 路由组
 - Wire provider 已接入 publish 依赖
-- `internal/service/publish/hmd` 已补 Mongo 集成测试，默认跳过，显式开启后验证 HMD 主链路
-- `internal/service/publish` 已补 facade 单元测试，验证 HMD mutation changes 会统一派发给 HPD Apply
+- `internal/service/hmd` 已补 Mongo 集成测试，默认跳过，显式开启后验证 HMD 主链路
+- `internal/service/publish` 已补 应用服务 单元测试，验证 HMD mutation changes 会统一派发给 HPD Apply
 - `internal/handler/v1/publish` 已补基础 HTTP binding 测试，覆盖 JSON 绑定、ObjectID 解析、参数错误和 service errcode 响应
 - 真实服务联调已通过，覆盖受保护路由、Redis session、handler、PublishService、HMD service 和 Mongo 落库
 - 联调已确认分散式房间不写入 `room_type_id`
@@ -158,18 +158,18 @@
 
 - 真实服务启动后的 curl 联调
 - Mongo 落库校验
-- HMD service / facade / handler 分层测试
+- HMD service / 应用服务 / handler 分层测试
 
 但这部分仍然不能直接视为完整发房闭环：
 
 - handler request binding 目前只有基础覆盖，还需要随接口扩展继续补充
-- HPD projector / outbox 尚未实现
-- HPD 当前 `Apply` 仍是 no-op
+- HPD seed 数据、读接口和 outbox 尚未实现
 
 当前判断：
 
 - publish 第一版 HMD 后端链路已验证通过
 - 发房前端可以开始接入 HMD 录入、维护、房态流转 E2E
+- HPD 小程序 projector 已接入 HMD changes，但小程序查询 API 仍未完成
 
 ### 3.2 HPD 未完成
 

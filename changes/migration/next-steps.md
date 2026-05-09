@@ -118,7 +118,7 @@ handler
 - PublishService 已经统一派发 `hpd.Service.Apply(changes)`
 - 真实服务 curl 联调已经通过
 - handler request binding 已有基础测试覆盖
-- HPD 仍是 no-op 预留点
+- HPD 小程序 projector 已接入，后续需要 seed 与读接口
 
 ### 2.3 这一步的实施顺序
 
@@ -142,8 +142,8 @@ handler
 router
   -> handler/v1/publish
     -> service/publish/service.go
-      -> service/publish/hmd/*.go
-      -> service/publish/hpd/*.go
+      -> service/hmd/*.go
+      -> service/hpd/*.go
       -> repository/hmd
       -> repository/hpd
 ```
@@ -157,14 +157,14 @@ router
 - `publish 上层 service`
   - 负责 publish 业务动作语义
   - 统一处理 HMD mutation result 中的 changes
-  - 只做 facade 编排，不承载 HMD 具体实现
+  - 只做 应用服务 编排，不承载 HMD 具体实现
 - `HMD 子 service`
   - 负责 HMD 相关校验和组合调用
   - 写操作返回 `HmdMutationResult`
   - 返回明确 `errcode`，不把错误语义留给 handler 猜
 - `HPD 子 service`
-  - 当前 no-op
-  - 后续通过 `Apply(changes)` 调 projector 或 outbox worker 复用的投影逻辑
+  - 通过 `Apply(changes)` 调 projector
+  - 后续 outbox worker 复用同一套投影逻辑
 - `repository`
   - 负责数据库读写
 
@@ -208,25 +208,38 @@ Repository 不负责：
 internal/service/publish/
   service.go
   types.go
-  hmd/
-    hmd_service.go
-    hmd_centralized_project.go
-    hmd_building.go
-    hmd_room_type.go
-    hmd_centralized_room.go
-    hmd_decentralized_community.go
-    hmd_decentralized_room.go
-    hmd_validation.go
-    hmd_change.go
-    errors.go
-    mapper.go
-    dto_common.go
-    dto_centralized.go
-    dto_room_type.go
-    dto_decentralized.go
-    dto_room.go
-  hpd/
-    service.go
+  dependencies.go
+  centralized_project.go
+  building.go
+  room_type.go
+  centralized_room.go
+  decentralized_community.go
+  decentralized_room.go
+
+internal/service/hmd/
+  hmd_service.go
+  hmd_centralized_project.go
+  hmd_building.go
+  hmd_room_type.go
+  hmd_centralized_room.go
+  hmd_decentralized_community.go
+  hmd_decentralized_room.go
+  hmd_validation.go
+  hmd_change.go
+  errors.go
+  mapper.go
+  dto_common.go
+  dto_centralized.go
+  dto_room_type.go
+  dto_decentralized.go
+  dto_room.go
+
+internal/service/hpd/
+  service.go
+  miniapp_projector.go
+  miniapp_mapper.go
+  miniapp_fanout.go
+  errors.go
 ```
 
 ### `service.go`
@@ -240,9 +253,16 @@ internal/service/publish/
 负责：
 
 - 定义 `PublishService`
-- 注入 `publish/hmd.Service`
-- 注入 `publish/hpd.Service`
-- 暴露 publish action 对应的方法
+- 注入 `service/hmd.Service`
+- 注入 `service/hpd.Service`
+- 保留通用 mutation resolve helper
+- 不承载具体对象 action 方法
+
+约束：
+
+- publish action 方法必须按对象拆文件
+- `service.go` 不继续堆所有 action
+- HMD / HPD 实现不放在 publish 目录下
 - 统一派发 HMD changes 给 HPD
 
 不负责：
@@ -255,7 +275,7 @@ internal/service/publish/
 
 功能：
 
-- 暴露 publish facade 的对外输入类型
+- 暴露 publish service 的对外输入类型
 
 负责：
 
@@ -488,21 +508,20 @@ internal/service/publish/
 - `UpdateDecentralizedRoomInput`
 - `UpdateDecentralizedRoomStatusInput`
 
-### `hpd/service.go`
+### `service/hpd`
 
 功能：
 
-- 预留 HPD 子 service 落点
+- 承载 HPD 展示层同步入口和 projector
 
 当前阶段：
 
-- 可以先建最小接口或最小骨架
-- 暂不实现具体业务逻辑
-- 需要在文件注释中写清楚：当前阶段是 no-op 预留，后续由 `PublishService` 决定调用点
+- 已实现第一期小程序 HPD projector
+- 后续继续补 seed、读接口和 outbox
 
 目的：
 
-- 明确 publish 后续一定会接入 HPD
+- 保持 publish 只派发 changes，HPD 投影逻辑独立于发房域目录
 
 ---
 
@@ -570,5 +589,5 @@ internal/handler/v1/publish/
 1. 发房前端接入 `POST /api/v1/publish/{action}` 第一阶段接口
 2. 用真实服务完成前后端 E2E
 3. 修复 E2E 暴露出的字段、校验、响应结构和交互问题
-4. 继续补充 handler / publish facade / HMD service 的边界用例
+4. 继续补充 handler / publish service / HMD service 的边界用例
 5. 按 [../../backend/miniapp-hpd.md](../../backend/miniapp-hpd.md) 实现小程序 HPD projector

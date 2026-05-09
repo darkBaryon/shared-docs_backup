@@ -17,6 +17,6 @@
 
 ## 文档入口
 
-- API：[../api/miniapp.md](../api/miniapp.md)
+- API：[../api/miniapp-api.md](../api/miniapp-api.md)
 - Auth 流程：[../api/auth-flow.md](../api/auth-flow.md)
 - 前端约定：[../frontend/index.md](../frontend/index.md)

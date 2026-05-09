@@ -8,9 +8,9 @@
 
 ```text
 PublishService
-  -> publish/hmd.Service
+  -> hmd.Service
     -> HmdMutationResult{Entity, Changes}
-  -> publish/hpd.Service.Apply(changes)
+  -> hpd.Service.Apply(changes)
 ```
 
 ## 说明
@@ -18,12 +18,12 @@ PublishService
 - HMD 负责房源主数据。
 - HPD 负责发布与展示层数据。
 - 发房系统第一期先落 HMD 能力。
-- HMD 实现位于 `internal/service/publish/hmd`。
-- HPD 实现位于 `internal/service/publish/hpd`。
-- `internal/service/publish` 顶层只保留 facade，不承载 HMD 具体实现。
-- `publish/hmd.Service` 不直接调用 HPD。
+- HMD 实现位于 `internal/service/hmd`。
+- HPD 实现位于 `internal/service/hpd`。
+- `internal/service/publish` 顶层只保留 应用服务，不承载 HMD 具体实现。
+- `hmd.Service` 不直接调用 HPD。
 - HMD 写操作返回 changes，PublishService 统一派发给 `hpd.Service`。
-- HPD 当前 `Apply` 是 no-op 预留点，后续接入 projector 或 outbox worker 复用的投影逻辑。
+- HPD projector 位于 `internal/service/hpd`，后续 outbox worker 复用同一套投影逻辑。
 - 错误语义由 service 层返回 `errcode`，handler 不通过字符串归类错误。
 
 ## 后续
