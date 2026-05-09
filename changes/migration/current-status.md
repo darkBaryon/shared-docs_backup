@@ -131,12 +131,13 @@
 - Wire provider 已接入 publish 依赖
 - `internal/service/publish/hmd` 已补 Mongo 集成测试，默认跳过，显式开启后验证 HMD 主链路
 - `internal/service/publish` 已补 facade 单元测试，验证 HMD mutation changes 会统一派发给 HPD Apply
+- `internal/handler/v1/publish` 已补基础 HTTP binding 测试，覆盖 JSON 绑定、ObjectID 解析、参数错误和 service errcode 响应
 
 当前判断：
 
 - publish 已经不是早期大文件草稿
-- HMD service 和 publish facade 已开始分层验证
-- 但还需要 handler request binding 测试和真实服务 curl 联调
+- HMD service、publish facade 和 handler 边界已开始分层验证
+- 但还需要真实服务 curl 联调
 
 ## 3. 仍然应视为未完成的部分
 
@@ -151,14 +152,14 @@
 但这部分仍然不能直接视为完全完成：
 
 - 还没有真实服务启动后的 curl 联调记录
-- 还没有覆盖 handler request binding 的测试
+- handler request binding 目前只有基础覆盖，还需要随接口扩展继续补充
 - HPD projector / outbox 尚未实现
 - HPD 当前 `Apply` 仍是 no-op
 
 当前判断：
 
 - publish 第一版链路已进入可联调状态
-- 下一步应补 handler 边界测试，再做真实服务 curl 联调和问题修复
+- 下一步应做真实服务 curl 联调和问题修复
 
 ### 3.2 HPD 未完成
 

@@ -98,7 +98,7 @@ publish 当前按分层验证：
 
 1. `internal/service/publish/hmd`：Mongo 集成测试，验证 HMD 子能力的数据写入、查询、列表、更新、状态更新、唯一性、归属关系和字段约束。
 2. `internal/service/publish`：facade 单元测试，验证 HMD 写成功后会调用 HPD `Apply(changes)`，HMD 失败时不调用，读操作不调用，Apply 错误会向上返回。
-3. `internal/handler/v1/publish`：后续补 HTTP binding 测试，重点覆盖 JSON 绑定、ObjectID 解析、参数错误和 service errcode 响应。
+3. `internal/handler/v1/publish`：已补基础 HTTP binding 测试，重点覆盖 JSON 绑定、ObjectID 解析、参数错误和 service errcode 响应。
 4. 真实服务 curl 联调：最后验证 route、middleware、wire、config 和依赖装配。
 
 HMD Mongo 集成测试默认跳过，运行方式：

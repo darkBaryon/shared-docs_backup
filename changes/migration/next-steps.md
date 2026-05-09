@@ -557,8 +557,7 @@ internal/handler/v1/publish/
 
 下一步要先做的是：
 
-1. 补 handler request binding 测试，验证 JSON 绑定、ObjectID 解析、参数错误和 service errcode 响应
-2. 启动真实服务，按 `api/publish.md` 做第一轮 curl 联调
-3. 修复联调暴露出的参数绑定、校验、路由和依赖装配问题
-4. 继续补充 publish facade / HMD service 的边界用例
-5. 再继续设计并实现 HPD projector
+1. 启动真实服务，按 `api/publish.md` 做第一轮 curl 联调
+2. 修复联调暴露出的参数绑定、校验、路由和依赖装配问题
+3. 继续补充 handler / publish facade / HMD service 的边界用例
+4. 再继续设计并实现 HPD projector
