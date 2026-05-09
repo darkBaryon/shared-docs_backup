@@ -42,7 +42,13 @@ POST /api/v1/{module}/{action}
 - `error` 成功时为空字符串，失败时为可展示错误文案。
 - 前端不得依赖 HTTP status 判断业务成功。
 
-### 1.3 鉴权
+### 1.3 字段命名
+
+Miniapp API 请求和响应字段统一使用 `snake_case`。
+
+后端不得直接返回 Go model JSON。当前 Go model 的 JSON tag 多为 `camelCase`，小程序接口必须通过 miniapp response DTO 映射输出，例如 `listingId` 映射为 `listing_id`、`assetMode` 映射为 `asset_mode`。
+
+### 1.4 鉴权
 
 公开接口：
 
@@ -59,14 +65,16 @@ Authorization: Bearer <token>
 
 `house/public_detail` 允许匿名访问。匿名访问时 `is_favorited=false`；如果请求带有效 token，后端返回真实收藏状态。
 
-### 1.4 ID 口径
+token 是后端签发的 opaque Redis session token，不是 JWT。前端只需要原样放入 `Authorization: Bearer <token>`，不要解析 token 内容，也不要依赖 token 自身判断过期。
+
+### 1.5 ID 口径
 
 - 小程序房源统一使用 `listing_id`。
 - `listing_id` 关联 `hs_hpd_listing._id`。
 - 收藏、足迹、房源详情都使用同一个 `listing_id`。
 - 禁止使用旧字段 `house_id`。
 
-### 1.5 分页
+### 1.6 分页
 
 分页请求统一使用：
 
@@ -79,12 +87,18 @@ Authorization: Bearer <token>
 
 ```json
 {
-  "list": [],
-  "page": 1,
-  "page_size": 20,
-  "total": 0
+  "code": 0,
+  "error": "",
+  "data": {
+    "list": [],
+    "page": 1,
+    "page_size": 20,
+    "total": 0
+  }
 }
 ```
+
+实现要求：小程序分页接口不得使用当前 Go 后端 `response.SuccessPage` 的顶层 `maxSize/size/data` 结构。实现时应使用符合本契约的 DTO 或 `response.Success(c, { list, page, page_size, total })`。
 
 ## 2. 公共对象
 
@@ -214,7 +228,7 @@ POST /api/v1/auth/wechat_login
   "code": 0,
   "error": "",
   "data": {
-    "token": "jwt-token"
+    "token": "opaque-bearer-token"
   }
 }
 ```
@@ -250,7 +264,7 @@ POST /api/v1/auth/wechat/register
   "code": 0,
   "error": "",
   "data": {
-    "token": "jwt-token"
+    "token": "opaque-bearer-token"
   }
 }
 ```
