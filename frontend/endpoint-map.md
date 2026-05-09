@@ -42,5 +42,5 @@
 ## 通用约定
 
 - 除登录接口外，默认走 `Authorization: Bearer <token>`。
-- 响应统一 `{ code, message, data }`。
-- HTTP 非 2xx 优先读取 `detail`。
+- Go 后端响应统一 `{ code, error, data }`。
+- HTTP 非 2xx 优先读取 `error`。

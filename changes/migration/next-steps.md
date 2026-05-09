@@ -7,7 +7,11 @@
 
 前提：
 
-> 当前 publish 第一版代码链路已经接入，但还没有完成真实接口联调和测试补强。
+> 当前 publish 第一版 HMD 后端链路已经完成真实服务联调。下一步不是继续证明后端能否跑通，而是让发房前端接入这组接口，并继续推进 HPD。
+
+补充：
+
+> HPD 先做小程序展示层，因为小程序前端已有代码，可以直接进入 E2E。
 
 ---
 
@@ -15,14 +19,20 @@
 
 ### 1.1 当前阶段要做的需求
 
-当前阶段不是直接把整个发房系统做完，而是把发房系统第一期从“代码接入”推进到“可验证可迭代”。
+当前阶段不是直接把整个发房系统做完，而是把发房系统第一期从“后端已验证”推进到“前端可 E2E”。
 
 第一期目标：
 
-- review 当前 publish 第一版代码链路
-- 用真实服务验证 HMD 相关发房 API
-- 补齐必要测试和文档
+- 发房前端接入 HMD 相关发房 API
+- 用真实服务完成前后端 E2E
+- 根据前端联调反馈补齐必要的 handler case 和文档
 - 给后续 HPD 接入留出正确位置
+
+HPD 当前目标：
+
+- 先实现小程序列表和详情需要的 HPD
+- 从集中式房间和分散式房间生成展示层快照
+- 不先做后台管理 HPD、房东端 HPD、审核流和 outbox worker
 
 这一期要覆盖的业务对象：
 
@@ -99,26 +109,26 @@ handler
 
 ### 2.2 先做什么
 
-当前最先要做的是验证 publish 第一版链路。
+当前最先要做的是发房前端 E2E。
 
 原因：
 
 - service、handler、route、Wire 已经接入
 - HMD 写操作已经返回 `Entity + Changes`
 - PublishService 已经统一派发 `hpd.Service.Apply(changes)`
-- 但还没有真实 curl 联调记录
-- handler request binding 还没有测试覆盖
+- 真实服务 curl 联调已经通过
+- handler request binding 已有基础测试覆盖
 - HPD 仍是 no-op 预留点
 
 ### 2.3 这一步的实施顺序
 
 接下来正确顺序是：
 
-1. review 当前 publish 第一版代码结构
-2. 启动真实服务，按 `api/publish.md` 做 curl 联调
-3. 补 handler request binding 测试和 service 基础测试
-4. 修复联调发现的问题
-5. 再继续设计并实现 HPD projector
+1. 发房前端按 `api/publish.md` 接入 HMD 录入、详情、列表、更新和房态流转
+2. 用真实服务做前后端 E2E
+3. 修复 E2E 暴露出的字段、校验、响应结构和交互问题
+4. 随接口扩展继续补 handler / service 边界用例
+5. 按 [../../backend/miniapp-hpd.md](../../backend/miniapp-hpd.md) 设计并实现小程序 HPD projector
 
 ---
 
@@ -557,7 +567,8 @@ internal/handler/v1/publish/
 
 下一步要先做的是：
 
-1. 启动真实服务，按 `api/publish.md` 做第一轮 curl 联调
-2. 修复联调暴露出的参数绑定、校验、路由和依赖装配问题
-3. 继续补充 handler / publish facade / HMD service 的边界用例
-4. 再继续设计并实现 HPD projector
+1. 发房前端接入 `POST /api/v1/publish/{action}` 第一阶段接口
+2. 用真实服务完成前后端 E2E
+3. 修复 E2E 暴露出的字段、校验、响应结构和交互问题
+4. 继续补充 handler / publish facade / HMD service 的边界用例
+5. 按 [../../backend/miniapp-hpd.md](../../backend/miniapp-hpd.md) 实现小程序 HPD projector

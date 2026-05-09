@@ -20,10 +20,15 @@
 - `hs_hmd_room_decentralized`：分散式房间实例
 
 ## C. 发布与展示（hpd）
-- `hs_hpd_listing`：发布主实体
-- `hs_hpd_listing_index`：前台检索与展示索引
-- `hs_hpd_contact`：对外联系信息
-- `hs_hpd_entrust_relation`：委托关系与服务归属
+- `hs_hpd_listing`：发布主实体 / 统一 listing identity
+- `hs_hpd_miniapp_listing`：小程序检索与展示 read model
+- `hs_hpd_contact`：对外联系信息（后续接入）
+- `hs_hpd_entrust_relation`：委托关系与服务归属（后续接入）
+
+后续按端独立设计：
+
+- `hs_hpd_admin_listing`：后台管理 read model，当前不建
+- `hs_hpd_publisher_listing`：发房端/房东端 read model，当前不建
 
 ## D. 审核与变更（hac）
 - `hs_hac_audit_task`：上架审核任务

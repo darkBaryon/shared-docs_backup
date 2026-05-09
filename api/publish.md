@@ -4,9 +4,11 @@
 
 - 本文档用于定义发房系统接口命名与第一期接口范围。
 - 发房系统模块统一使用 `publish` 作为 API 模块名。
-- 当前第一期重点先落 HMD 录入与维护能力，但发房系统整体语义不局限于 HMD，后续可继续扩展到 HPD 发布与展示层。
+- 当前第一期 HMD 录入与维护后端链路已通过真实服务联调，但发房系统整体语义不局限于 HMD，后续可继续扩展到 HPD 发布与展示层。
 
 ## 2. 路径命名规则
+
+路径命名遵守 [../overview/project-spec.md](../overview/project-spec.md)。
 
 统一命名格式：
 
@@ -132,7 +134,7 @@ POST /api/v1/publish/{action}
 ```json
 {
   "code": 0,
-  "message": "ok",
+  "error": "",
   "data": {}
 }
 ```

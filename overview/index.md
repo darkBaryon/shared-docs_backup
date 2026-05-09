@@ -4,6 +4,7 @@
 
 ## 文档
 
+- [project-spec.md](./project-spec.md)：项目通用代码规范、API 命名、MongoDB / Redis 约定。
 - [project-background.md](./project-background.md)：项目背景、整体业务功能、迁移关系。
 - [system-map.md](./system-map.md)：系统组成和前后端关系。
 - [glossary.md](./glossary.md)：项目术语表。

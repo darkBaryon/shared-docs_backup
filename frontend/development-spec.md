@@ -90,14 +90,17 @@ src/
 
 ### 5.1 URL 规则
 
+- API 路径命名遵守 [../overview/project-spec.md](../overview/project-spec.md)。
 - 基础域名来自环境变量，例如 `VITE_API_BASE_URL`。
 - 公共前缀统一为 `/api/v1`。
 - `endpoints.ts` 中统一写业务短路径，例如 `"/house/search"`。
+- 业务短路径必须是 `/{模块}/{动作}`，例如 `"/house/search"`、`"/publish/create_centralized_project"`。
 
 禁止：
 
 - 在 `endpoints.ts` 中写完整域名。
 - 在 `endpoints.ts` 中重复写 `/api/v1`。
+- 在 `endpoints.ts` 中写 `"/miniapp/listing/search"` 这类多级业务路径。
 
 ### 5.2 请求方法
 
@@ -113,7 +116,7 @@ src/
 ### 5.4 成功与失败
 
 - 业务成功判定：`code === 0`
-- HTTP 非 2xx：优先读取 `detail`，其次 `message`、`msg`
+- HTTP 非 2xx：优先读取 `error`
 - HTTP 2xx 但 `code !== 0`：按业务失败处理
 - 错误提示统一由请求层处理
 

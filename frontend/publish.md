@@ -2,6 +2,13 @@
 
 发房系统前端以 [../api/publish.md](../api/publish.md) 为接口依据。
 
+## 当前后端状态
+
+- 发房端后端第一期 HMD 链路已通过真实服务联调。
+- 前端可以开始接入 HMD 录入、详情、列表、更新和房态流转。
+- 当前接口已经走 Redis Session 鉴权，联调时需要 `Authorization: Bearer <token>`。
+- HPD 仍是 no-op，暂时不要把 HMD 结果当成小程序展示层数据。
+
 ## 约定
 
 - API 路径使用 `POST /api/v1/publish/{action}`。

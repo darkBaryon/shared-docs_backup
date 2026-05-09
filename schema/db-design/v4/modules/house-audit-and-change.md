@@ -137,6 +137,7 @@
 ## 4. 流程关联约定
 
 - `hs_hac_audit_task` 审核通过后，更新 `hs_hpd_listing.listing_status=3`。
-- `hs_hac_audit_task` 审核驳回后，保持 `hs_hpd_listing.listing_status` 为非上架态，并写 `audit_remark`。
-- `hs_hac_change_request` 审核通过后，将 `after_snapshot` 应用到 `hs_hpd_listing`，并刷新 `hs_hpd_listing_index`。
+- `hs_hac_audit_task` 审核驳回后，保持 `hs_hpd_listing.listing_status` 为非上架态，审核说明保存在 `hs_hac_audit_task.audit_remark`。
+- `hs_hac_change_request` 审核通过后，由业务 service 将变更应用到对应 HMD 来源或发布状态，并刷新对应前端 read model。
+- 小程序展示刷新目标为 `hs_hpd_miniapp_listing`。
 - 所有发布动作必须写 `hs_hac_publish_log` 审计记录。

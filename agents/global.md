@@ -18,8 +18,8 @@
 ## 工作方式
 
 1. 先确认当前任务属于哪个端或哪个模块。
-2. 先读对应 Agent 文档，再读对应 API / schema / flow。
-3. 修改接口时必须同步 API 文档。
+2. 先读 [../overview/project-spec.md](../overview/project-spec.md)，再读对应 Agent 文档、API、schema、flow。
+3. 修改接口时必须遵守 `POST /api/v{version}/{模块}/{动作}`，并同步 API 文档。
 4. 修改数据库字段、枚举、索引时必须同步 schema 文档。
 5. 修改跨模块流程时必须同步 flows 或 changes。
 6. 不要把历史输入文档当成当前事实源，当前事实源以规范类文档和最新 ADR 为准。

@@ -1,6 +1,6 @@
 # Changes
 
-本目录维护变更记录、迁移进度、评审检查和架构决策。
+本目录维护变更记录、迁移进度和架构决策。
 
 ## 迁移
 
@@ -15,5 +15,4 @@
 ## 记录
 
 - [backend-sync-changelog.md](./backend-sync-changelog.md)
-- [backend-review-checklist.md](./backend-review-checklist.md)
 - [auth-implementation-adjustments-2026-04-14.md](./auth-implementation-adjustments-2026-04-14.md)

@@ -12,17 +12,17 @@
 - 测试数据和索引脚本
 - 发房系统接口命名和文档草案
 - publish service / handler / route 第一版接入
+- publish 第一版 HMD 接口端到端联调
 - shared-docs 文档模块化整理
 
 当前尚未完成：
 
-- publish 第一版接口端到端联调
 - HPD 实现
 - 后台管理系统实现
 
 所以当前阶段应定义为：
 
-> 底层基础已经稳定，publish 第一版已接入代码链路，下一步重点是联调、补测试和继续 HPD。
+> 底层基础已经稳定，publish 第一版 HMD 后端链路已完成并通过真实服务联调，下一步重点是发房前端 E2E 与 HPD。
 
 ## 2. 已确认完成事项
 
@@ -105,10 +105,13 @@
 - 发房系统 API 模块名确定为 `publish`
 - 路径命名确定为 `POST /api/v1/publish/{action}`
 - 发房系统第一期接口草案已写入共享文档
+- 项目通用代码规范已整理到 `overview/project-spec.md`
+- 小程序 HPD 第一期接口路径确定为 `POST /api/v1/house/search` 和 `POST /api/v1/house/public_detail`
 
 当前判断：
 
 - 文档层已经明确 `publish` 是业务域，不是纯 HMD CRUD 模块
+- 接口路径必须遵守 `POST /api/v{version}/{模块}/{动作}`，不再使用多级业务路径
 
 ### 2.6 Publish 第一版代码链路
 
@@ -132,16 +135,18 @@
 - `internal/service/publish/hmd` 已补 Mongo 集成测试，默认跳过，显式开启后验证 HMD 主链路
 - `internal/service/publish` 已补 facade 单元测试，验证 HMD mutation changes 会统一派发给 HPD Apply
 - `internal/handler/v1/publish` 已补基础 HTTP binding 测试，覆盖 JSON 绑定、ObjectID 解析、参数错误和 service errcode 响应
+- 真实服务联调已通过，覆盖受保护路由、Redis session、handler、PublishService、HMD service 和 Mongo 落库
+- 联调已确认分散式房间不写入 `room_type_id`
 
 当前判断：
 
 - publish 已经不是早期大文件草稿
-- HMD service、publish facade 和 handler 边界已开始分层验证
-- 但还需要真实服务 curl 联调
+- 发房端后端第一期 HMD 能力已可供前端 E2E 联调
+- 完整发房到展示闭环仍需 HPD
 
 ## 3. 仍然应视为未完成的部分
 
-### 3.1 Publish 还需要端到端验证
+### 3.1 Publish 后端第一期仍不是完整发房闭环
 
 当前仓库里已经有：
 
@@ -149,29 +154,35 @@
 - `internal/handler/v1/publish`
 - Wire publish provider
 
-但这部分仍然不能直接视为完全完成：
+并且已完成：
 
-- 还没有真实服务启动后的 curl 联调记录
+- 真实服务启动后的 curl 联调
+- Mongo 落库校验
+- HMD service / facade / handler 分层测试
+
+但这部分仍然不能直接视为完整发房闭环：
+
 - handler request binding 目前只有基础覆盖，还需要随接口扩展继续补充
 - HPD projector / outbox 尚未实现
 - HPD 当前 `Apply` 仍是 no-op
 
 当前判断：
 
-- publish 第一版链路已进入可联调状态
-- 下一步应做真实服务 curl 联调和问题修复
+- publish 第一版 HMD 后端链路已验证通过
+- 发房前端可以开始接入 HMD 录入、维护、房态流转 E2E
 
 ### 3.2 HPD 未完成
 
 尚未完成：
 
 - `hs_hpd_listing`
-- `hs_hpd_listing_index`
+- `hs_hpd_miniapp_listing`
 - 录房动作到展示层数据的同步逻辑
 
 当前判断：
 
 - 这是 publish 域后续必须接入的部分，不是可无限后置的事情
+- HPD 先做小程序展示层，规划见 [../../backend/miniapp-hpd.md](../../backend/miniapp-hpd.md)
 
 ### 3.3 后台管理系统未完成
 
@@ -201,11 +212,11 @@
 
 ## 5. 当前主要风险
 
-### 5.1 过早把 publish 第一版当成完全定稿
+### 5.1 过早把 publish 第一版当成完整发房闭环
 
-publish 第一版已经接入，但仍需要真实接口联调和测试补强。
+publish 第一版 HMD 后端链路已经验证通过，但它不是完整发房闭环。
 
-如果不经过联调就继续堆 HPD 或后台管理，后续仍可能返工。
+如果前端直接把 HMD 联调结果理解为小程序展示层已完成，后续仍会错用数据源。
 
 ### 5.2 HPD 被拖得太后
 

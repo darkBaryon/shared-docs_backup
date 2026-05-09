@@ -16,19 +16,23 @@
 
 ## Source of Truth
 
-1. API 路径、方法、请求响应：优先看 [api/openapi.yaml](./api/openapi.yaml)。
-2. API 说明和模块口径：看 [api/](./api/index.md)。
-3. 数据库字段、枚举、索引、约束：看 [schema/](./schema/index.md)。
-4. 后端实现边界：看 [backend/](./backend/index.md)。
-5. 不同端 Agent 接手任务：先看 [agents/](./agents/index.md)。
-6. 历史调整、迁移进度、架构决策：看 [changes/](./changes/index.md)。
+1. 项目通用规范、API 命名、MongoDB / Redis 约定：先看 [overview/project-spec.md](./overview/project-spec.md)。
+2. API 路径、方法、请求响应：优先看 [api/openapi.yaml](./api/openapi.yaml)。
+3. API 说明和模块口径：看 [api/](./api/index.md)。
+4. 数据库字段、枚举、索引、约束：看 [schema/](./schema/index.md)。
+5. 后端实现边界：看 [backend/](./backend/index.md)。
+6. 不同端 Agent 接手任务：先看 [agents/](./agents/index.md)。
+7. 历史调整、迁移进度、架构决策：看 [changes/](./changes/index.md)。
 
 ## 建议阅读顺序
 
 1. [overview/project-background.md](./overview/project-background.md)
-2. [overview/system-map.md](./overview/system-map.md)
-3. [agents/global.md](./agents/global.md)
-4. 对应端的 Agent 文档，例如 [agents/backend-go.md](./agents/backend-go.md)
-5. 对应模块 API，例如 [api/publish.md](./api/publish.md)
-6. 对应数据库设计，例如 [schema/db-design/v4/modules/house-master-data.md](./schema/db-design/v4/modules/house-master-data.md)
-7. [changes/migration/current-status.md](./changes/migration/current-status.md)
+2. [overview/project-spec.md](./overview/project-spec.md)
+3. [overview/system-map.md](./overview/system-map.md)
+4. [agents/global.md](./agents/global.md)
+5. 对应端的 Agent 文档，例如 [agents/backend-go.md](./agents/backend-go.md)
+6. 对应模块 API，例如 [api/publish.md](./api/publish.md)
+7. 对应数据库设计，例如 [schema/db-design/v4/modules/house-master-data.md](./schema/db-design/v4/modules/house-master-data.md)
+8. [changes/migration/current-status.md](./changes/migration/current-status.md)
+
+当前小程序 HPD 规划见 [backend/miniapp-hpd.md](./backend/miniapp-hpd.md)。

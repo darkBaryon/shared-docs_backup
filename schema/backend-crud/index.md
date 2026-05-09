@@ -221,8 +221,72 @@
   - 参数：`id` 房间 ID；`roomStatus` 房间状态值。
   - 返回：更新失败返回 error。
 
-## 3. 说明
+## 3. 发布与展示（HPD）
+
+### `hs_hpd_listing`
+
+- `Create(entity *model.HpdListing) error`
+  - 用途：创建发布主实体。
+  - 参数：`entity` 必须包含 `source_type`、`source_id`、`asset_mode`、`listing_status`。
+  - 返回：创建失败返回 error。
+- `FindByID(id bson.ObjectID) (*model.HpdListing, error)`
+  - 用途：按 listing ID 查询发布主实体。
+  - 参数：`id` listing ID。
+  - 返回：命中返回记录；未命中返回 `nil, nil`。
+- `FindBySource(sourceType model.HpdSourceType, sourceID bson.ObjectID) (*model.HpdListing, error)`
+  - 用途：按 HMD 来源对象查询发布主实体。
+  - 参数：`sourceType` 来源类型；`sourceID` 来源对象 ID。
+  - 返回：命中返回记录；未命中返回 `nil, nil`。
+- `UpsertBySource(entity *model.HpdListing) (*model.HpdListing, error)`
+  - 用途：按 `source_type + source_id` 创建或更新发布主实体。
+  - 参数：`entity` 发布主实体。
+  - 返回：写入后的发布主实体。
+- `UpdateLifecycleFields(id bson.ObjectID, fields bson.M) error`
+  - 用途：更新发布生命周期字段。
+  - 参数：`id` listing ID；`fields` 仅允许 `listing_status`、`published_at`、`offline_at`。
+  - 返回：更新失败返回 error。
+- `UpdateStatus(id bson.ObjectID, listingStatus model.HpdListingStatus) error`
+  - 用途：更新发布状态。
+  - 参数：`id` listing ID；`listingStatus` 发布状态。
+  - 返回：更新失败返回 error。
+
+### `hs_hpd_miniapp_listing`
+
+- `Create(entity *model.HpdMiniappListing) error`
+  - 用途：创建小程序展示 read model。
+  - 参数：`entity` 必须包含 `listing_id`、`source_type`、`source_id`、`asset_mode`、`rent_mode`、`city`、`title`。
+  - 返回：创建失败返回 error。
+- `FindByID(id bson.ObjectID) (*model.HpdMiniappListing, error)`
+  - 用途：按 `_id` 查询小程序展示记录。
+  - 参数：`id` 文档 ID。
+  - 返回：命中返回记录；未命中返回 `nil, nil`。
+- `FindByListingID(listingID bson.ObjectID) (*model.HpdMiniappListing, error)`
+  - 用途：按统一 listing ID 查询小程序展示记录。
+  - 参数：`listingID` 关联 `hs_hpd_listing._id`。
+  - 返回：命中返回记录；未命中返回 `nil, nil`。
+- `FindBySource(sourceType model.HpdSourceType, sourceID bson.ObjectID) (*model.HpdMiniappListing, error)`
+  - 用途：按 HMD 来源对象查询小程序展示记录。
+  - 参数：`sourceType` 来源类型；`sourceID` 来源对象 ID。
+  - 返回：命中返回记录；未命中返回 `nil, nil`。
+- `FindOnlineDetail(listingID bson.ObjectID) (*model.HpdMiniappListing, error)`
+  - 用途：按 listing ID 查询小程序在线详情。
+  - 参数：`listingID` 关联 `hs_hpd_listing._id`。
+  - 返回：在线命中返回记录；未命中或非在线返回 `nil, nil`。
+- `UpsertByListingID(entity *model.HpdMiniappListing) (*model.HpdMiniappListing, error)`
+  - 用途：按 `listing_id` 创建或更新小程序展示记录。
+  - 参数：`entity` 小程序展示记录。
+  - 返回：写入后的小程序展示记录。
+- `UpdateProjectionFields(listingID bson.ObjectID, fields bson.M) error`
+  - 用途：按 `listing_id` 局部更新小程序展示字段。
+  - 参数：`listingID` 关联 `hs_hpd_listing._id`；`fields` 只允许展示字段，不允许改 `listing_id/source_id` 等身份字段。
+  - 返回：更新失败返回 error。
+- `SearchMiniapp(search MiniappListingSearchFilter) ([]model.HpdMiniappListing, error)`
+  - 用途：查询小程序在线房源列表。
+  - 参数：`search` 支持城市、区域、商圈、租住方式、价格区间、分页。
+  - 返回：按 `weight_score`、`updated_at` 倒序的在线房源列表。
+
+## 4. 说明
 
 - 当前文档只记录已经在 Go 后端仓库中落地的方法。
-- 若后续新增 `hpd`、`hac`、`lead` 等模块 repository，需要同步追加到本文件。
+- 若后续新增 `hac`、`lead` 等模块 repository，需要同步追加到本文件。
 - 若数据库设计调整，应同时更新 `schema/db-design/` 与本文件。

@@ -5,6 +5,7 @@
 ## 契约源
 
 - [openapi.yaml](./openapi.yaml)：API 契约源。
+- [../overview/project-spec.md](../overview/project-spec.md)：项目通用规范，包含 API 路由格式和命名约束。
 
 ## 模块文档
 
@@ -16,4 +17,6 @@
 ## 规则
 
 - 新增接口先更新 OpenAPI，再更新对应模块文档。
-- 接口路径统一采用当前项目规范，不为旧前端兼容。
+- 接口路径统一采用 `POST /api/v{version}/{模块}/{动作}`。
+- `{动作}` 必须是单个 path segment，不允许继续追加业务层级。
+- 不为旧前端、旧数据库做兼容。

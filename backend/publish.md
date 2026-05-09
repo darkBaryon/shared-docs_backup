@@ -19,6 +19,7 @@ handler/v1/publish
 - HMD 写操作返回 `Entity + Changes`。
 - PublishService 统一把 changes 交给 `hpd.Service.Apply`。
 - HPD 当前 `Apply` 是 no-op 预留点，后续接入 projector 或 outbox worker 复用的投影逻辑。
+- Publish 第一阶段 HMD 链路已完成真实服务联调，route / middleware / Redis session / handler / service / Mongo 落库均已验证通过。
 
 ## Handler 层
 
@@ -99,7 +100,7 @@ publish 当前按分层验证：
 1. `internal/service/publish/hmd`：Mongo 集成测试，验证 HMD 子能力的数据写入、查询、列表、更新、状态更新、唯一性、归属关系和字段约束。
 2. `internal/service/publish`：facade 单元测试，验证 HMD 写成功后会调用 HPD `Apply(changes)`，HMD 失败时不调用，读操作不调用，Apply 错误会向上返回。
 3. `internal/handler/v1/publish`：已补基础 HTTP binding 测试，重点覆盖 JSON 绑定、ObjectID 解析、参数错误和 service errcode 响应。
-4. 真实服务 curl 联调：最后验证 route、middleware、wire、config 和依赖装配。
+4. 真实服务 curl 联调：已验证 route、middleware、wire、config 和依赖装配。
 
 HMD Mongo 集成测试默认跳过，运行方式：
 
@@ -116,6 +117,32 @@ go test ./internal/service/publish/hmd -run Integration -count=1 -v
 - 正常 `go test ./...` 不会访问 Mongo。
 - 集成测试只清理 `itest_` 前缀测试数据。
 - 如果有独立测试库，优先改用 `PUBLISH_HMD_TEST_DB=house_manager_test`，不要依赖业务库。
+
+真实服务联调已覆盖：
+
+- `auth/session` 鉴权中间件
+- `create_centralized_project`
+- `centralized_project_detail`
+- `list_centralized_projects`
+- `create_building`
+- `update_building`
+- `list_buildings_by_project`
+- `create_room_type`
+- `list_room_types_by_building`
+- `create_centralized_room`
+- `update_centralized_room_status`
+- `list_centralized_rooms_by_building`
+- `create_decentralized_community`
+- `list_decentralized_communities`
+- `create_decentralized_room`
+- `update_decentralized_room_status`
+- `list_decentralized_rooms_by_community`
+
+联调确认：
+
+- 受保护 publish 路由必须携带 `Authorization: Bearer <session-token>`。
+- HMD 六个 collection 均可真实落库。
+- 分散式房间不写入 `room_type_id`。
 
 ## 约束
 
