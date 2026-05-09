@@ -7,7 +7,7 @@
 
 前提：
 
-> 当前 `internal/service/publish` 里的代码还没有完成 review，不能当成已完成实现，只能当成草稿。
+> 当前 publish 第一版代码链路已经接入，但还没有完成真实接口联调和测试补强。
 
 ---
 
@@ -15,12 +15,13 @@
 
 ### 1.1 当前阶段要做的需求
 
-当前阶段不是直接把整个发房系统做完，而是先做发房系统第一期。
+当前阶段不是直接把整个发房系统做完，而是把发房系统第一期从“代码接入”推进到“可验证可迭代”。
 
 第一期目标：
 
-- 先把 `publish` 域的整体架构定清楚
-- 先把 HMD 相关的发房能力接成可调用 API
+- review 当前 publish 第一版代码链路
+- 用真实服务验证 HMD 相关发房 API
+- 补齐必要测试和文档
 - 给后续 HPD 接入留出正确位置
 
 这一期要覆盖的业务对象：
@@ -98,30 +99,26 @@ handler
 
 ### 2.2 先做什么
 
-当前最先要做的不是 handler，也不是 HPD，而是先整理 `internal/service/publish`。
+当前最先要做的是验证 publish 第一版链路。
 
 原因：
 
-- 现在的 `hmd_service.go` 已经太大
-- 现在的 `dto.go` 已经没有边界
-
-如果不先整理文件结构，后面无论继续写：
-
-- publish 上层 service
-- handler
-- HPD
-
-都会继续堆到错误的文件里。
+- service、handler、route、Wire 已经接入
+- HMD 写操作已经返回 `Entity + Changes`
+- PublishService 已经统一派发 `hpd.Service.Apply(changes)`
+- 但还没有真实 curl 联调记录
+- handler request binding 还没有测试覆盖
+- HPD 仍是 no-op 预留点
 
 ### 2.3 这一步的实施顺序
 
 接下来正确顺序是：
 
-1. 先 review 当前 `internal/service/publish` 草稿
-2. 先重组 `internal/service/publish` 的文件结构
-3. 再实现 publish 上层 service
-4. 再实现 publish handler 和路由
-5. 再继续接 HPD
+1. review 当前 publish 第一版代码结构
+2. 启动真实服务，按 `api/publish.md` 做 curl 联调
+3. 补 handler request binding 测试和 service 基础测试
+4. 修复联调发现的问题
+5. 再继续设计并实现 HPD projector
 
 ---
 
@@ -135,8 +132,8 @@ handler
 router
   -> handler/v1/publish
     -> service/publish/service.go
-      -> service/publish/hmd_*.go
-      -> service/publish/hpd_*.go
+      -> service/publish/hmd/*.go
+      -> service/publish/hpd/*.go
       -> repository/hmd
       -> repository/hpd
 ```
@@ -149,10 +146,15 @@ router
   - 只做 HTTP 参数绑定、调用 service、返回 response
 - `publish 上层 service`
   - 负责 publish 业务动作语义
+  - 统一处理 HMD mutation result 中的 changes
+  - 只做 facade 编排，不承载 HMD 具体实现
 - `HMD 子 service`
   - 负责 HMD 相关校验和组合调用
+  - 写操作返回 `HmdMutationResult`
+  - 返回明确 `errcode`，不把错误语义留给 handler 猜
 - `HPD 子 service`
-  - 负责后续发布和展示层数据
+  - 当前 no-op
+  - 后续通过 `Apply(changes)` 调 projector 或 outbox worker 复用的投影逻辑
 - `repository`
   - 负责数据库读写
 
@@ -190,26 +192,31 @@ Repository 不负责：
 
 ## 4.1 `internal/service/publish`
 
-当前要先整理成下面这套结构：
+当前已整理为下面这套结构：
 
 ```text
 internal/service/publish/
   service.go
-  hmd_service.go
-  hmd_centralized_project.go
-  hmd_building.go
-  hmd_room_type.go
-  hmd_centralized_room.go
-  hmd_decentralized_community.go
-  hmd_decentralized_room.go
-  hmd_validation.go
-  mapper.go
-  dto_common.go
-  dto_centralized.go
-  dto_room_type.go
-  dto_decentralized.go
-  dto_room.go
-  hpd_service.go
+  types.go
+  hmd/
+    hmd_service.go
+    hmd_centralized_project.go
+    hmd_building.go
+    hmd_room_type.go
+    hmd_centralized_room.go
+    hmd_decentralized_community.go
+    hmd_decentralized_room.go
+    hmd_validation.go
+    hmd_change.go
+    errors.go
+    mapper.go
+    dto_common.go
+    dto_centralized.go
+    dto_room_type.go
+    dto_decentralized.go
+    dto_room.go
+  hpd/
+    service.go
 ```
 
 ### `service.go`
@@ -223,16 +230,33 @@ internal/service/publish/
 负责：
 
 - 定义 `PublishService`
-- 注入 HMD 子 service
-- 后续注入 HPD 子 service
+- 注入 `publish/hmd.Service`
+- 注入 `publish/hpd.Service`
 - 暴露 publish action 对应的方法
+- 统一派发 HMD changes 给 HPD
 
 不负责：
 
 - 直接写 repository 细节
 - 承载所有 HMD 具体实现
+- 用字符串判断错误类型
 
-### `hmd_service.go`
+### `types.go`
+
+功能：
+
+- 暴露 publish facade 的对外输入类型
+
+负责：
+
+- 让 handler 只依赖 `internal/service/publish`
+- 通过类型别名复用 HMD 子 service 的第一期输入结构
+
+不负责：
+
+- 承载 HMD 实现逻辑
+
+### `hmd/hmd_service.go`
 
 功能：
 
@@ -240,7 +264,7 @@ internal/service/publish/
 
 负责：
 
-- 定义 `HmdService`
+- 定义 `hmd.Service`
 - 持有所有 HMD repository
 - 只保留构造函数和聚合结构
 
@@ -249,7 +273,7 @@ internal/service/publish/
 - 承载所有对象方法
 - 承载全部 helper
 
-### `hmd_centralized_project.go`
+### `hmd/hmd_centralized_project.go`
 
 功能：
 
@@ -262,7 +286,7 @@ internal/service/publish/
 - `ListCentralizedProjects`
 - `UpdateCentralizedProject`
 
-### `hmd_building.go`
+### `hmd/hmd_building.go`
 
 功能：
 
@@ -275,7 +299,7 @@ internal/service/publish/
 - `ListBuildingsByProject`
 - `UpdateBuilding`
 
-### `hmd_room_type.go`
+### `hmd/hmd_room_type.go`
 
 功能：
 
@@ -289,7 +313,7 @@ internal/service/publish/
 - `ListRoomTypesByBuilding`
 - `UpdateRoomType`
 
-### `hmd_centralized_room.go`
+### `hmd/hmd_centralized_room.go`
 
 功能：
 
@@ -304,7 +328,7 @@ internal/service/publish/
 - `UpdateCentralizedRoom`
 - `UpdateCentralizedRoomStatus`
 
-### `hmd_decentralized_community.go`
+### `hmd/hmd_decentralized_community.go`
 
 功能：
 
@@ -317,7 +341,7 @@ internal/service/publish/
 - `ListDecentralizedCommunities`
 - `UpdateDecentralizedCommunity`
 
-### `hmd_decentralized_room.go`
+### `hmd/hmd_decentralized_room.go`
 
 功能：
 
@@ -331,7 +355,15 @@ internal/service/publish/
 - `UpdateDecentralizedRoom`
 - `UpdateDecentralizedRoomStatus`
 
-### `hmd_validation.go`
+硬约束：
+
+- 这里必须修正当前草稿里的 `room_type_id` 口径问题
+- 分散式房间不能继续引用 `hs_hmd_room_type_centralized`
+- 当前阶段已经定稿：分散式暂不提供房型模型
+- 因此分散式房间当前不提供 `RoomTypeID`
+- 后续如果要支持分散式房型，必须单独定义分散式房型模型和数据结构
+
+### `hmd/hmd_validation.go`
 
 功能：
 
@@ -346,7 +378,30 @@ internal/service/publish/
 - 小区重复校验
 - 其他 HMD 依赖关系检查
 
-### `mapper.go`
+边界约束：
+
+- 这里只放跨对象共享校验
+- 某个对象私有校验，尽量留在对应的 `hmd_*.go` 文件里
+- 不允许把 `hmd_validation.go` 继续堆成新的 helper 大杂烩
+
+### `hmd/errors.go`
+
+功能：
+
+- 放 HMD 子 service 的错误语义 helper
+
+负责：
+
+- 返回 `errcode.InvalidParam`
+- 返回 `errcode.NotFound`
+- 返回 `errcode.AlreadyExists`
+- 返回 `errcode.DatabaseError`
+
+约束：
+
+- handler 不再通过字符串归类 service 错误
+
+### `hmd/mapper.go`
 
 功能：
 
@@ -359,7 +414,7 @@ internal/service/publish/
 - slice clone / trim
 - 公共字段转换
 
-### `dto_common.go`
+### `hmd/dto_common.go`
 
 功能：
 
@@ -371,7 +426,7 @@ internal/service/publish/
 - `TaggedImageInput`
 - 其他跨对象复用的小结构
 
-### `dto_centralized.go`
+### `hmd/dto_centralized.go`
 
 功能：
 
@@ -385,7 +440,7 @@ internal/service/publish/
 - `CreateBuildingInput`
 - `UpdateBuildingInput`
 
-### `dto_room_type.go`
+### `hmd/dto_room_type.go`
 
 功能：
 
@@ -396,7 +451,7 @@ internal/service/publish/
 - `CreateRoomTypeInput`
 - `UpdateRoomTypeInput`
 
-### `dto_decentralized.go`
+### `hmd/dto_decentralized.go`
 
 功能：
 
@@ -408,7 +463,7 @@ internal/service/publish/
 - `CreateDecentralizedCommunityInput`
 - `UpdateDecentralizedCommunityInput`
 
-### `dto_room.go`
+### `hmd/dto_room.go`
 
 功能：
 
@@ -423,7 +478,7 @@ internal/service/publish/
 - `UpdateDecentralizedRoomInput`
 - `UpdateDecentralizedRoomStatusInput`
 
-### `hpd_service.go`
+### `hpd/service.go`
 
 功能：
 
@@ -431,8 +486,9 @@ internal/service/publish/
 
 当前阶段：
 
-- 可以先建空文件或最小骨架
-- 暂不实现具体逻辑
+- 可以先建最小接口或最小骨架
+- 暂不实现具体业务逻辑
+- 需要在文件注释中写清楚：当前阶段是 no-op 预留，后续由 `PublishService` 决定调用点
 
 目的：
 
@@ -442,12 +498,18 @@ internal/service/publish/
 
 ## 5. handler 层文件架构
 
-在 `service/publish` 整理完成后，再新增：
+当前 handler 层采用：
 
 ```text
 internal/handler/v1/publish/
   handler.go
-  request.go
+  routes.go
+  request_common.go
+  request_centralized.go
+  request_building.go
+  request_room_type.go
+  request_room.go
+  request_decentralized.go
   response.go
 ```
 
@@ -455,15 +517,20 @@ internal/handler/v1/publish/
 
 功能：
 
-- 实现 publish action 对应的 handler method
+- 持有 `PublishService`
+- 暴露 handler 构造函数
 
 负责：
 
-- 绑定请求
-- 调用 `PublishService`
-- 返回统一响应
+- 保持 handler 聚合结构清晰
 
-### `request.go`
+### `routes.go`
+
+功能：
+
+- 注册 publish action 对应路由
+
+### `request_*.go`
 
 功能：
 
@@ -473,31 +540,25 @@ internal/handler/v1/publish/
 
 - 这层 request 不要和 service DTO 混在一起
 - handler request 只服务 HTTP 输入
+- request 到 service input 的转换要显式写在 handler 层
 
 ### `response.go`
 
 功能：
 
-- 放 handler 层返回结构
-- 或者放 response mapping helper
+- 放 publish response helper
+- 只调用 `response.Err(c, err)`，错误语义来自 service 返回的 `errcode`
 
 ---
 
 ## 6. 接下来先做什么
 
-下一步不要继续往 `hmd_service.go` 和 `dto.go` 里堆代码。
+当前 `service/publish` 和 handler 文件边界已经整理完成，不要再把 HMD 细节塞回 publish 顶层。
 
 下一步要先做的是：
 
-1. 重组 `internal/service/publish` 文件结构
-2. 把当前 `hmd_service.go` 拆开
-3. 把当前 `dto.go` 拆开
-4. 再开始实现 `service.go`
-
-只有这一步做完，后面的：
-
-- publish 上层 service
-- publish handler
-- HPD 子 service
-
-才值得继续写。
+1. 补 handler request binding 测试，验证 JSON 绑定、ObjectID 解析、参数错误和 service errcode 响应
+2. 启动真实服务，按 `api/publish.md` 做第一轮 curl 联调
+3. 修复联调暴露出的参数绑定、校验、路由和依赖装配问题
+4. 继续补充 publish facade / HMD service 的边界用例
+5. 再继续设计并实现 HPD projector

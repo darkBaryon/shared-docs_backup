@@ -4,7 +4,7 @@
 
 ## 文档列表
 
-- [project-background.md](./project-background.md)
+- [../../overview/project-background.md](../../overview/project-background.md)
   - 项目背景
   - 整体业务功能
   - 前后端组成
@@ -20,8 +20,8 @@
 
 ## 建议阅读顺序
 
-1. [project-background.md](./project-background.md)
+1. [../../overview/project-background.md](../../overview/project-background.md)
 2. [current-status.md](./current-status.md)
 3. [next-steps.md](./next-steps.md)
-4. [../../api/发房系统接口文档.md](../../api/发房系统接口文档.md)
-5. [../../schema/backend-crud.md](../../schema/backend-crud.md)
+4. [../../api/publish.md](../../api/publish.md)
+5. [../../schema/backend-crud/index.md](../../schema/backend-crud/index.md)

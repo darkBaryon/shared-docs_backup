@@ -129,7 +129,6 @@
 | 字段 | 类型 | 必填 | 默认值 | 备注 |
 | --- | --- | --- | --- | --- |
 | `decentralized_id` | objectId | 是 | 无 | 关联 `hs_hmd_decentralized._id` |
-| `room_type_id` | objectId | 否 | 无 | 关联分散式房型模板（如启用） |
 | `room_no` | string | 是 | 无 | 房间号 |
 | `floor_no` | int | 否 | `0` | 楼层 |
 | `rent_mode` | string | 是 | 无 | 租住方式（whole/shared） |
@@ -148,6 +147,11 @@
 | `start_rent_rule` | string | 否 | `""` | 起租规则 |
 | `images` | array<string> | 否 | `[]` | 房间图片 |
 | `room_facilities` | array<string> | 否 | `[]` | 房间配置标签 |
+
+当前约束：
+
+- 分散式暂不提供独立房型模型
+- `hs_hmd_room_decentralized` 当前不包含 `room_type_id`
 
 索引：
 - `decentralized_id_1_room_no_1`（唯一）

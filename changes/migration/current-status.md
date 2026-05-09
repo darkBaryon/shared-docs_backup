@@ -11,18 +11,18 @@
 - HMD repository 层落地
 - 测试数据和索引脚本
 - 发房系统接口命名和文档草案
+- publish service / handler / route 第一版接入
+- shared-docs 文档模块化整理
 
 当前尚未完成：
 
-- publish 域整体架构定稿
-- publish 上层 service
-- publish handler / 路由
+- publish 第一版接口端到端联调
 - HPD 实现
 - 后台管理系统实现
 
 所以当前阶段应定义为：
 
-> 底层基础已经稳定，但发房系统业务实现还没有开始进入正式落地阶段。
+> 底层基础已经稳定，publish 第一版已接入代码链路，下一步重点是联调、补测试和继续 HPD。
 
 ## 2. 已确认完成事项
 
@@ -110,91 +110,57 @@
 
 - 文档层已经明确 `publish` 是业务域，不是纯 HMD CRUD 模块
 
+### 2.6 Publish 第一版代码链路
+
+已完成：
+
+- `internal/service/publish` 顶层已收敛为 facade
+- HMD 子域已拆到 `internal/service/publish/hmd`
+- HPD 子域已拆到 `internal/service/publish/hpd`
+- `PublishService` 已作为 handler 入口
+- `hmd.Service` 已作为 HMD 子 service
+- `hpd.Service` 已作为 no-op 预留点
+- HMD 写操作已返回 `Entity + Changes`
+- PublishService 已统一调用 `hpd.Service.Apply(changes)`
+- `internal/handler/v1/publish` 已接入第一期 publish API
+- publish handler 已从 `internal/handler/v1` 根包移入独立子包
+- publish handler request 已按对象拆分，不再把所有请求结构堆在单个大文件
+- handler HTTP request 已和 service DTO 解耦，`geo/images` 等字段显式转换到 service input
+- publish service 已返回明确 `errcode`，handler 不再用字符串归类 service 错误
+- publish 路由已注册到受保护 `/api/v1` 路由组
+- Wire provider 已接入 publish 依赖
+- `internal/service/publish/hmd` 已补 Mongo 集成测试，默认跳过，显式开启后验证 HMD 主链路
+- `internal/service/publish` 已补 facade 单元测试，验证 HMD mutation changes 会统一派发给 HPD Apply
+
+当前判断：
+
+- publish 已经不是早期大文件草稿
+- HMD service 和 publish facade 已开始分层验证
+- 但还需要 handler request binding 测试和真实服务 curl 联调
+
 ## 3. 仍然应视为未完成的部分
 
-### 3.1 Publish 代码还不能算完成
+### 3.1 Publish 还需要端到端验证
 
 当前仓库里已经有：
 
-- `internal/service/publish/dto.go`
-- `internal/service/publish/hmd_service.go`
-
-但这两部分现在只能算：
-
-- 草稿实现
-- 未经过完整架构 review
-- 不能当成 publish 域已经完成
-
-原因：
-
-- `publish` 整体设计还没最终定稿
-- HPD 还没有进入 publish 架构
-- handler、路由、请求结构、响应结构都还没形成完整链路
-- 当前 `hmd_service.go` 已经承载了过多对象和校验逻辑，文件结构本身不可继续扩张
-- 当前 `dto.go` 也已经把多类输入结构堆在一个文件里，边界不清
-
-所以这部分代码要归类为：
-
-> 已有草稿，但仍属于接下来要做的事情。
-
-更准确地说：
-
-> 当前 `internal/service/publish` 的文件结构本身就是阻塞项，在继续实现 publish 上层 service、handler、HPD 之前，必须先整理。
-
-### 3.2 Publish 上层 service 未完成
-
-尚未完成：
-
-- 真正作为 publish 域入口的上层编排 service
-
-当前判断：
-
-- 现在只有 HMD 子能力草稿
-- 真正的 publish use case 层还没开始正式落地
-
-### 3.3 Publish 子 service 文件结构未完成
-
-尚未完成：
-
-- `internal/service/publish` 的文件级职责拆分
-
-当前问题：
-
-- `hmd_service.go` 已经同时承载：
-  - 集中式项目
-  - 楼栋
-  - 房型
-  - 集中式房间
-  - 分散式小区
-  - 分散式房间
-  - 校验 helper
-  - DTO 转换 helper
-- `dto.go` 已经同时承载：
-  - centralized
-  - decentralized
-  - room type
-  - room
-  - status
-  - geo / image 辅助结构
-
-当前判断：
-
-- 这个结构不能继续往上叠 publish 上层 service、handler、HPD
-- 否则 publish 域会在 very early stage 变成不可维护的大文件集合
-
-### 3.4 Publish handler 与路由未完成
-
-尚未完成：
-
+- `internal/service/publish`
 - `internal/handler/v1/publish`
-- publish 路由注册
-- 应用装配链中的 publish 接入
+- Wire publish provider
+
+但这部分仍然不能直接视为完全完成：
+
+- 还没有真实服务启动后的 curl 联调记录
+- 还没有覆盖 handler request binding 的测试
+- HPD projector / outbox 尚未实现
+- HPD 当前 `Apply` 仍是 no-op
 
 当前判断：
 
-- 发房系统还不能视为一个可调用的 API 模块
+- publish 第一版链路已进入可联调状态
+- 下一步应补 handler 边界测试，再做真实服务 curl 联调和问题修复
 
-### 3.5 HPD 未完成
+### 3.2 HPD 未完成
 
 尚未完成：
 
@@ -206,6 +172,18 @@
 
 - 这是 publish 域后续必须接入的部分，不是可无限后置的事情
 
+### 3.3 后台管理系统未完成
+
+尚未完成：
+
+- 后台管理产品范围
+- 后台管理 API
+- 后台管理 handler / service
+
+当前判断：
+
+- 后台管理和发房系统是两个前端，后续应独立设计 API 和 handler
+
 ## 4. 当前可以直接复用的基础
 
 以下部分可以作为下一阶段稳定基础：
@@ -214,34 +192,21 @@
 - `internal/repository/auth`
 - `internal/repository/hmd`
 - `internal/service/auth`
-- `api/发房系统接口文档.md`
-- `schema/backend-crud.md`
+- `internal/service/publish`
+- `internal/handler/v1/publish`
+- `api/publish.md`
+- `schema/backend-crud/index.md`
 - `schema/db-design/v4/*`
 
 ## 5. 当前主要风险
 
-### 5.1 过早把 publish 草稿代码当成定稿
+### 5.1 过早把 publish 第一版当成完全定稿
 
-现在最大的风险，是直接在当前 `publish` 草稿上继续堆 handler 和 route，而没有先把整体架构评审清楚。
+publish 第一版已经接入，但仍需要真实接口联调和测试补强。
 
-这样后面 HPD 接入时很容易推倒重来。
+如果不经过联调就继续堆 HPD 或后台管理，后续仍可能返工。
 
-### 5.2 过早接受当前 publish 文件结构
-
-现在不只是“publish 业务边界还没定稿”，还包括：
-
-- 当前 `hmd_service.go` 已经太大
-- 当前 `dto.go` 已经没有清晰边界
-
-如果不先做文件级重组，后面的所有 publish 功能都会继续堆到这些文件上。
-
-### 5.3 把 publish 误做成 HMD 直通层
-
-如果下一步直接让 handler 调 HMD repository 或者只做 HMD CRUD 接口，`publish` 会被错误收窄成数据录入层。
-
-这不是目标形态。
-
-### 5.4 HPD 被拖得太后
+### 5.2 HPD 被拖得太后
 
 发房系统最终不是只写 HMD。
 
@@ -252,3 +217,9 @@
 - 后台展示数据
 
 所以 HPD 虽然可以晚一步实现，但不能在架构上缺席。
+
+### 5.3 把后台管理误并入发房系统
+
+后台管理和发房系统不是同一个前端，也不是同一组 handler。
+
+后续后台管理应单独定义产品范围、API 和 service 入口。

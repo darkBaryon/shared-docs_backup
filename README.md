@@ -1,30 +1,34 @@
 # shared-docs
 
-前后端共享文档仓库。这里维护 API、变更记录、数据库结构与后端实现约定，是联调唯一参考源。
+前后端共享文档仓库。这里维护项目背景、产品范围、API、数据库结构、后端约定、前端约定、跨端流程、Agent 指令和变更记录，是联调与迁移工作的共同事实源。
 
-## 目录说明
+## 目录
 
-- `api/`：接口文档、接口映射、前后端联调说明。
-- `changes/`：口径调整、同步记录、评审检查记录。
-- `schema/`：数据库设计文档与后端 CRUD 实现约定。
-
-### 迁移专题
-
-- `changes/migration/project-background.md`：项目背景、前后端组成和迁移关系。
-- `changes/migration/index.md`：迁移背景、范围与文档总目录。
-- `changes/migration/current-status.md`：当前已完成事项与阶段判断。
-- `changes/migration/next-steps.md`：后续实施计划与推进顺序。
+- [agents/](./agents/index.md)：不同端开发 Agent 的工作规则。
+- [overview/](./overview/index.md)：项目全貌、系统组成、术语。
+- [product/](./product/index.md)：小程序、发房系统、后台管理、AI chat 的产品范围。
+- [api/](./api/index.md)：接口文档、OpenAPI、错误码、认证流程。
+- [schema/](./schema/index.md)：数据库设计与后端 CRUD 实现约定。
+- [backend/](./backend/index.md)：Go 后端工程架构与实现约定。
+- [frontend/](./frontend/index.md)：前端工程、接口映射与端侧约定。
+- [flows/](./flows/index.md)：跨模块业务流程。
+- [changes/](./changes/index.md)：迁移进度、变更记录、架构决策。
 
 ## Source of Truth
 
-当前仓库的接口联调、字段含义、流程规范，统一以本目录为准。
+1. API 路径、方法、请求响应：优先看 [api/openapi.yaml](./api/openapi.yaml)。
+2. API 说明和模块口径：看 [api/](./api/index.md)。
+3. 数据库字段、枚举、索引、约束：看 [schema/](./schema/index.md)。
+4. 后端实现边界：看 [backend/](./backend/index.md)。
+5. 不同端 Agent 接手任务：先看 [agents/](./agents/index.md)。
+6. 历史调整、迁移进度、架构决策：看 [changes/](./changes/index.md)。
 
 ## 建议阅读顺序
 
-1. `api/openapi.yaml`
-2. `api/error-codes.md`
-3. `api/auth-flow.md`、`api/miniapp接口文档.md`、`api/发房系统接口文档.md`
-4. `changes/backend-sync-changelog.md`
-5. `schema/db-design/v4/README.md`
-6. `schema/backend-crud.md`
-7. `changes/migration/index.md`
+1. [overview/project-background.md](./overview/project-background.md)
+2. [overview/system-map.md](./overview/system-map.md)
+3. [agents/global.md](./agents/global.md)
+4. 对应端的 Agent 文档，例如 [agents/backend-go.md](./agents/backend-go.md)
+5. 对应模块 API，例如 [api/publish.md](./api/publish.md)
+6. 对应数据库设计，例如 [schema/db-design/v4/modules/house-master-data.md](./schema/db-design/v4/modules/house-master-data.md)
+7. [changes/migration/current-status.md](./changes/migration/current-status.md)
