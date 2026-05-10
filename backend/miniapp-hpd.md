@@ -232,9 +232,45 @@ POST /api/v1/house/public_detail
 - 小程序是前端端类型，不作为这里的 API 模块名。
 - 禁止使用 `/api/v1/miniapp/listing/search` 这类多级业务路径。
 
-## 7. 代码架构
+## 7. 代码架构 Review 结论
 
-### 7.1 Model
+旧计划里把小程序读接口放在：
+
+```text
+internal/service/miniapp/
+internal/handler/v1/miniapp/
+```
+
+该方案需要调整。
+
+原因：
+
+- `miniapp` 是前端端类型，不是后端业务模块。
+- 对外 API 模块已经确认是 `house`，不是 `miniapp`。
+- 后续还会有 `favorite`、`history`、`user` 等小程序端接口，如果都塞进 `service/miniapp`，会形成端类型大杂烩。
+- HPD 是内部展示层 read model，不是对外 API 模块；`service/hpd` 应继续只负责 projection / lifecycle / `Apply(changes)`，不承载小程序读 API。
+
+最终依赖链必须是：
+
+```text
+handler/v1/house
+  -> service/house
+    -> repository/hpd.MiniappListingRepository
+      -> hs_hpd_miniapp_listing
+```
+
+明确禁止：
+
+```text
+handler -> service/hpd projector
+handler -> repository/hpd
+handler -> hmd
+service/house -> hmd
+```
+
+## 8. 最终目录结构
+
+### 8.1 Model
 
 ```text
 internal/model/
@@ -250,7 +286,7 @@ internal/model/
 - 定义 HPD 枚举
 - 定义 create / update 字段校验
 
-### 7.2 Repository
+### 8.2 Repository
 
 ```text
 internal/repository/hpd/
@@ -272,6 +308,7 @@ internal/repository/hpd/
   - `FindByListingID`
   - `UpsertByListingID`
   - `SearchMiniapp`
+  - `CountMiniapp`
   - `FindOnlineDetail`
 - `fields.go`
   - 字段白名单
@@ -281,7 +318,7 @@ internal/repository/hpd/
   - `listing_id` 唯一索引
   - 小程序筛选索引
 
-### 7.3 Service
+### 8.3 HPD Projection Service
 
 ```text
 internal/service/hpd/
@@ -308,41 +345,191 @@ internal/service/hpd/
 - `errors.go`
   - 返回明确 `errcode`
 
-小程序读接口 service 建议单独放：
+约束：
+
+- `service/hpd` 只负责 HPD projection / lifecycle / `Apply(changes)`。
+- `service/hpd` 不对外提供 `house/search` 或 `house/public_detail` 读 API。
+- handler 不直接调用 `service/hpd` projector。
+
+### 8.4 House Read Service
+
+小程序找房读接口按业务模块放在 `service/house`：
 
 ```text
-internal/service/miniapp/
-  listing_service.go
-  dto.go
+internal/service/house/
+  service.go
+  search.go
+  search_types.go
+  detail.go
+  detail_types.go
+  mapper.go
+  filter.go
+  errors.go
 ```
 
-原因：
+文件职责：
 
-- `hpd` 负责投影写入。
-- `miniapp` service 负责小程序读查询。
-- 不把小程序读逻辑塞进 publish service。
+- `service.go`
+  - 定义 `HouseService` struct。
+  - 定义 `NewHouseService`。
+  - 定义 `miniappListingRepository` 接口，只暴露读接口：
+    - `SearchMiniapp`
+    - `CountMiniapp`
+    - `FindOnlineDetail`
+- `search.go`
+  - 实现 `Search(ctx, input)`。
+  - 负责分页归一化。
+  - 调用 repository 查询列表和总数。
+  - 返回 service 层业务结果，不返回 repository model。
+- `search_types.go`
+  - 定义 `SearchInput`。
+  - 定义 `SearchResult`。
+  - 定义 `ListItem`。
+- `detail.go`
+  - 实现 `GetPublicDetail(ctx, input)`。
+  - 对非在线或不存在房源返回 `errcode.NotFound`。
+- `detail_types.go`
+  - 定义 `DetailInput`。
+  - 定义 `DetailResult`。
+  - 定义 `Detail`。
+- `mapper.go`
+  - `model.HpdMiniappListing -> ListItem`。
+  - `model.HpdMiniappListing -> Detail`。
+  - 负责 ObjectID 转 hex、枚举转 string、图片/费用对象复制。
+- `filter.go`
+  - `SearchInput -> repository/hpd.MiniappListingSearchFilter`。
+  - 负责 skip / limit 计算。
+  - 负责 asset mode、keyword、feature flags 等筛选字段透传到 repository filter。
+- `errors.go`
+  - 参数错误包装为 `errcode.InvalidParam`。
+  - 详情不存在包装为 `errcode.NotFound`。
+  - repository / Mongo 错误包装为 `errcode.DatabaseError`。
 
-### 7.4 Handler
+约束：
+
+- `service/house` 只能依赖 `repository/hpd.MiniappListingRepository`。
+- `service/house` 不能依赖 HMD repository / HMD service。
+- `service/house` 不能调用 `service/hpd` projector。
+- `service/house` 返回业务结果，不直接返回 `model.HpdMiniappListing`。
+
+### 8.5 House Handler
 
 ```text
-internal/handler/v1/miniapp/
+internal/handler/v1/house/
   handler.go
   routes.go
-  house.go
-  requests.go
+  search.go
+  search_request.go
+  search_response.go
+  detail.go
+  detail_request.go
+  detail_response.go
 ```
 
-职责：
+文件职责：
 
-- 绑定小程序查询参数
-- 调用 `service/miniapp`
-- 返回小程序展示结构
-- 注册 `POST /api/v1/house/search`
-- 注册 `POST /api/v1/house/public_detail`
+- `handler.go`
+  - 定义 `HouseHandler` struct。
+  - 定义 `NewHouseHandler`。
+  - 定义 handler 依赖的 `houseService` interface。
+- `routes.go`
+  - 注册 `POST /api/v1/house/search`。
+  - 注册 `POST /api/v1/house/public_detail`。
+- `search.go`
+  - HTTP handler：绑定请求、转 service input、调用 `service/house.Search`、返回响应。
+- `search_request.go`
+  - 定义 snake_case HTTP request。
+  - 做 JSON bind 后的基础转换。
+- `search_response.go`
+  - 定义 snake_case API response DTO。
+  - `service/house.SearchResult -> API response`。
+  - 分页响应必须是 `data.list/page/page_size/total`。
+- `detail.go`
+  - HTTP handler：绑定请求、解析 `listing_id` ObjectID、调用 `service/house.GetPublicDetail`、返回响应。
+- `detail_request.go`
+  - 定义 `listing_id` 请求结构。
+  - 做 ObjectID 解析。
+- `detail_response.go`
+  - 定义 snake_case API response DTO。
+  - `service/house.DetailResult -> API response`。
 
-handler 不直接读 HMD，也不直接调 projector。
+约束：
 
-## 8. 索引规划
+- handler 只做 JSON bind、ObjectID 解析、调 service、`response.Success` / `response.Err`。
+- handler 不直接调用 `repository/hpd`。
+- handler 不直接调用 `service/hpd` projector。
+- handler 不直接读取 HMD。
+- 小程序 API 请求和响应字段统一使用 snake_case。
+- 不得直接返回 Go model JSON。
+
+## 9. Repository Filter 补充字段
+
+当前 `repository/hpd.MiniappListingSearchFilter` 已有字段：
+
+```text
+city
+district
+biz_area
+rent_mode
+price range
+skip
+limit
+```
+
+需要补齐小程序 API 契约字段：
+
+| 字段 | 类型 | 说明 |
+| --- | --- | --- |
+| `asset_mode` | `model.HpdAssetMode` | `centralized` / `decentralized` |
+| `keyword` | string | 关键词搜索 |
+| `feature_flags` | `[]string` | 结构化筛选标记 |
+
+筛选规则：
+
+- `SearchMiniapp` 和 `CountMiniapp` 必须强制加 `is_online=1`。
+- `asset_mode` 非空时必须校验合法枚举。
+- `keyword` 匹配展示字段，第一期建议覆盖：
+  - `title`
+  - `community_name`
+  - `building_or_community_name`
+  - `address_text`
+  - `subway_station`
+- `feature_flags` 使用全部命中语义，建议 Mongo 条件为 `$all`。
+- `FindOnlineDetail(listingID)` 必须同时匹配：
+  - `listing_id`
+  - `is_online=1`
+  - `status=1`
+
+## 10. Wire / 路由注册
+
+新增 provider：
+
+```text
+wire/providers_house.go
+```
+
+建议内容：
+
+```text
+HouseSet = wire.NewSet(
+  HpdRepositorySet 或 newHpdMiniappListingRepository,
+  housesvc.NewHouseService,
+  househandler.NewHouseHandler,
+)
+```
+
+如果 `newHpdMiniappListingRepository` 已在 `providers_publish.go` 中定义，应考虑把 HPD repository provider 从 publish provider 中抽出，避免 house 依赖 publish set。
+
+路由注册：
+
+- `handler/v1/house` 注册到 public `/api/v1` route group。
+- `POST /api/v1/house/search` 是公开接口。
+- `POST /api/v1/house/public_detail` 是公开接口。
+- 不挂强制 auth middleware。
+
+`public_detail` 后续需要支持“匿名可访问 + 带 token 返回收藏状态”时，应新增 optional auth 中间件或在 handler 内安全读取可选用户上下文；不能直接复用强制认证中间件。
+
+## 11. 索引规划
 
 ### `hs_hpd_listing`
 
@@ -365,7 +552,9 @@ is_online_1_rent_mode_1_price_1
 is_online_1_weight_score_-1_updated_at_-1
 ```
 
-## 9. 测试计划
+如 `keyword` 需求确认用 Mongo 正则，第一期可先不加全文索引；后续如果搜索性能不足，再单独评估 text index 或搜索引擎。
+
+## 12. 测试计划
 
 ### Repository
 
@@ -373,7 +562,12 @@ is_online_1_weight_score_-1_updated_at_-1
 - `UpsertBySource`
 - `UpsertByListingID`
 - `SearchMiniapp`
+- `CountMiniapp`
 - `FindOnlineDetail`
+- `SearchMiniapp` 支持 `asset_mode`
+- `SearchMiniapp` 支持 `keyword`
+- `SearchMiniapp` 支持 `feature_flags`
+- `SearchMiniapp` 永远只返回 `is_online=1`
 
 ### Projector
 
@@ -385,12 +579,33 @@ is_online_1_weight_score_-1_updated_at_-1
 - 小区变更 fan-out 刷新分散式房间
 - 分散式房间不依赖房型
 
-### Handler / API
+### Service / House
 
-- 搜索参数绑定
-- 详情 ObjectID 校验
-- 只返回在线房源
-- 无结果返回空列表
+- `Search` 参数校验：
+  - page / page_size 归一化
+  - 价格区间非法返回 `errcode.InvalidParam`
+  - 非法枚举返回 `errcode.InvalidParam`
+- `Search` 返回 `SearchResult`，不返回 repository model。
+- `Search` 空结果返回空 `list` 和正确分页字段。
+- `GetPublicDetail` 非法 `listing_id` 上游转换为参数错误。
+- `GetPublicDetail` 未命中或非在线返回 `errcode.NotFound`。
+- repository 错误包装为 `errcode.DatabaseError`。
+- mapper 输出 service result 时不泄露内部字段：
+  - `source_id`
+  - `source_type`
+  - `is_online`
+  - `weight_score`
+
+### Handler / House API
+
+- `house/search` JSON bind。
+- `house/search` 响应字段为 snake_case。
+- `house/search` 分页响应结构为 `data.list/page/page_size/total`。
+- `house/search` 不使用 `response.SuccessPage`。
+- `house/public_detail` ObjectID 校验。
+- `house/public_detail` 响应字段为 snake_case。
+- `house/public_detail` 匿名访问返回 `is_favorited=false`。
+- handler 不直接依赖 repository。
 
 ### E2E
 
@@ -399,23 +614,41 @@ is_online_1_weight_score_-1_updated_at_-1
 - 小程序查询列表命中
 - 小程序详情返回展示字段
 
-## 10. 实施顺序
+## 13. 实施顺序
 
-1. 确认当前小程序前端实际调用路径和字段。
-2. 定稿小程序查询 API。
-3. 补 `model/hpd*`。
-4. 补 `repository/hpd`。
-5. 补 HPD 索引脚本或初始化逻辑。
-6. 实现 `hpd.Service.Apply(changes)` 的 miniapp projector。
-7. 实现 `service/miniapp` 和 `handler/v1/miniapp`。
-8. 跑 repository / projector / handler 测试。
-9. 用发房端创建 HMD，再用小程序接口查询 HPD 做 E2E。
+已完成：
 
-## 11. 关键约束
+1. 定稿小程序查询 API 路径。
+2. 补 `model/hpd*`。
+3. 补 `repository/hpd` 基础能力。
+4. 实现 `hpd.Service.Apply(changes)` 的 miniapp projector。
+5. 实现 HMD -> HPD miniapp read model 映射。
+
+接下来：
+
+1. 补 `repository/hpd.MiniappListingSearchFilter`：
+   - `asset_mode`
+   - `keyword`
+   - `feature_flags`
+2. 实现 `internal/service/house`。
+3. 实现 `internal/handler/v1/house`。
+4. Wire 接入 `HouseSet`。
+5. 注册 `house/search`、`house/public_detail` 到 public `/api/v1` route group。
+6. 补 repository / service / handler 测试。
+7. 用 seed 或 fixture 创建 `listing_status=3` 的 HPD 数据并刷新 projection。
+8. 用小程序接口查询 HPD 做 E2E。
+
+## 14. 关键约束
 
 - 小程序只读 HPD，不读 HMD。
 - `hmd.Service` 不直接依赖 HPD。
 - projector 根据 HMD 当前源数据重建 HPD，不接收 handler 拼好的展示字段。
+- `service/hpd` 继续只负责 projection / lifecycle / `Apply(changes)`。
+- `service/house` 负责小程序找房读查询。
+- `handler/v1/house` 是对外 API 层，包名跟 API 模块 `house` 保持一致。
+- 小程序接口请求和响应字段必须使用 snake_case。
+- 不得直接返回 Go model JSON。
+- `house/search` 分页响应必须放在 `data` 内，不使用 `response.SuccessPage`。
 - 第一阶段不做集中式房型发布源。
 - 第一阶段不做 outbox，先保证同步 projector 跑通。
 - 第一阶段不做录入即发布，测试数据用 seed 灌入已上架状态。

@@ -9,12 +9,20 @@
 ```text
 小程序
   -> Go 后端房源查询 API
-    -> service/miniapp
-      -> repository/hpd
-        -> hs_hpd_miniapp_listing
+    -> handler/v1/house
+      -> service/house
+        -> repository/hpd.MiniappListingRepository
+          -> hs_hpd_miniapp_listing
 ```
 
 HPD 未完成前，不应让小程序直接依赖 HMD 主数据结构。
+
+边界约束：
+
+- `house` 是对外 API 模块；`miniapp` 是端类型，不作为 Go 后端 service / handler 包名。
+- `service/house` 只读 HPD read model，不读 HMD。
+- `handler/v1/house` 不直接调用 `repository/hpd`，也不调用 `service/hpd` projector。
+- `service/hpd` 继续只负责 HPD projection / lifecycle / `Apply(changes)`。
 
 ## 写入来源
 

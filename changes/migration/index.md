@@ -17,11 +17,16 @@
   - publish 域整体设计思路
   - 推荐代码架构
   - 接下来实施顺序
+- [terminal-application-service-architecture-plan.md](./terminal-application-service-architecture-plan.md)
+  - 三端 handler / service 目录架构
+  - HMD / HPD domain 化计划
+  - 后续迁移计划维护规则
 
 ## 建议阅读顺序
 
 1. [../../overview/project-background.md](../../overview/project-background.md)
 2. [current-status.md](./current-status.md)
 3. [next-steps.md](./next-steps.md)
-4. [../../api/publish.md](../../api/publish.md)
-5. [../../schema/backend-crud/index.md](../../schema/backend-crud/index.md)
+4. [terminal-application-service-architecture-plan.md](./terminal-application-service-architecture-plan.md)
+5. [../../api/publish.md](../../api/publish.md)
+6. [../../schema/backend-crud/index.md](../../schema/backend-crud/index.md)
