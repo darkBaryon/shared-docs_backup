@@ -1,32 +1,14 @@
-# Migration Docs Index
+# Migration
 
-这个目录用于记录 `house-manager` 的迁移背景、当前状态和后续规划。
+迁移状态统一维护在一个文件里：
 
-## 文档列表
+- [current-plan.md](./current-plan.md)
 
-- [../../overview/project-background.md](../../overview/project-background.md)
-  - 项目背景
-  - 整体业务功能
-  - 前后端组成
-  - Python / Go 后端关系
-- [current-status.md](./current-status.md)
-  - 当前真正已经完成的内容
-  - 仍然应视为未完成的部分
-  - 当前风险点
-- [next-steps.md](./next-steps.md)
-  - publish 域整体设计思路
-  - 推荐代码架构
-  - 接下来实施顺序
-- [terminal-application-service-architecture-plan.md](./terminal-application-service-architecture-plan.md)
-  - 三端 handler / service 目录架构
-  - HMD / HPD domain 化计划
-  - 后续迁移计划维护规则
+这个文件回答：
 
-## 建议阅读顺序
+- 当前项目怎么运作
+- 已完成什么
+- 还缺什么
+- 下一步先做什么
 
-1. [../../overview/project-background.md](../../overview/project-background.md)
-2. [current-status.md](./current-status.md)
-3. [next-steps.md](./next-steps.md)
-4. [terminal-application-service-architecture-plan.md](./terminal-application-service-architecture-plan.md)
-5. [../../api/publish.md](../../api/publish.md)
-6. [../../schema/backend-crud/index.md](../../schema/backend-crud/index.md)
+不要再新增临时进度或临时计划文件；做完任务后直接更新 [current-plan.md](./current-plan.md)。

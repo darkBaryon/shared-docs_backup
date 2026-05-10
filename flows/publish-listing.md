@@ -7,13 +7,13 @@
   -> POST /api/v1/publish/{action}
     -> PublishHandler
       -> PublishService
-        -> hmd.Service 写 HMD
+        -> domain/hmd.Service 写 HMD
           -> repository/hmd
             -> MongoDB HMD collections
-        -> hpd.Service.Apply(changes)
+        -> domain/hpd.Service.Apply(changes)
 ```
 
-当前 `hpd.Service.Apply` 已接入第一期小程序 HPD projector，HMD 房间及父级主数据变更会刷新对应展示快照。
+当前 `domain/hpd.Service.Apply` 已接入第一期小程序 HPD projector，HMD 房间及父级主数据变更会刷新对应展示快照。
 
 当前第一期后端链路已通过真实服务联调：
 
@@ -28,8 +28,8 @@
 
 ```text
 PublishService
-  -> hmd.Service 写主数据，返回 HmdMutationResult
-  -> hpd.Service.Apply(changes)
+  -> domain/hmd.Service 写主数据，返回 HmdMutationResult
+  -> domain/hpd.Service.Apply(changes)
     -> MiniappProjector
       -> 重新读取 HMD 当前源数据
       -> map HMD to HPD
@@ -47,7 +47,7 @@ HMD 写入事务
 
 worker
   -> 读取 outbox event
-  -> hpd.Service.Apply(changes)
+  -> domain/hpd.Service.Apply(changes)
 ```
 
 Projector 仍然复用 `Apply(changes)` 后面的投影逻辑。

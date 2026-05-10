@@ -1,18 +1,9 @@
 # Changes
 
-本目录维护变更记录、迁移进度和架构决策。
+本目录只保留当前迁移状态和下一步计划。
+
+已废弃接口、旧 endpoint map、阶段性流水账不在这里长期保留。
 
 ## 迁移
 
-- [migration/index.md](./migration/index.md)
-- [migration/current-status.md](./migration/current-status.md)
-- [migration/next-steps.md](./migration/next-steps.md)
-
-## 架构决策
-
-- [decisions/index.md](./decisions/index.md)
-
-## 记录
-
-- [backend-sync-changelog.md](./backend-sync-changelog.md)
-- [auth-implementation-adjustments-2026-04-14.md](./auth-implementation-adjustments-2026-04-14.md)
+- [migration/current-plan.md](./migration/current-plan.md)

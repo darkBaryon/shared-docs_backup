@@ -7,7 +7,9 @@
 ```text
 客户端
   -> auth login/register
-    -> Go auth service
+    -> handler/v1/miniapp/auth
+      -> service/miniapp/auth
+        -> domain/auth
       -> MongoDB user/auth/profile
       -> Redis session
   -> Authorization: Bearer <token>

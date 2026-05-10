@@ -53,7 +53,7 @@ Miniapp API 请求和响应字段统一使用 `snake_case`。
 公开接口：
 
 - `POST /api/v1/auth/wechat_login`
-- `POST /api/v1/auth/wechat/register`
+- `POST /api/v1/auth/wechat_register`
 - `POST /api/v1/house/search`
 - `POST /api/v1/house/public_detail`
 
@@ -236,7 +236,7 @@ POST /api/v1/auth/wechat_login
 ### 3.2 微信注册
 
 ```text
-POST /api/v1/auth/wechat/register
+POST /api/v1/auth/wechat_register
 ```
 
 用途：微信新用户注册，并绑定微信授权手机号。注册成功后直接返回登录 token。
@@ -312,7 +312,7 @@ POST /api/v1/user/profile
 ### 4.2 更新当前用户资料
 
 ```text
-POST /api/v1/user/profile/update
+POST /api/v1/user/update_profile
 ```
 
 用途：编辑个人资料和找房偏好。

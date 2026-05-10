@@ -7,7 +7,7 @@
 3. [../backend/index.md](../backend/index.md)
 4. [../api/index.md](../api/index.md)
 5. [../schema/index.md](../schema/index.md)
-6. [../changes/migration/current-status.md](../changes/migration/current-status.md)
+6. [../changes/migration/current-plan.md](../changes/migration/current-plan.md)
 
 ## 工程边界
 
@@ -19,17 +19,18 @@
 
 ## 当前重点
 
-- 先让迁移后的 Go 版本跑通业务主链路。
-- auth 已打通，publish 第一阶段 HMD 后端链路已通过真实服务联调。
-- HMD 是当前主数据基础，HPD 是后续展示层数据。
+- 当前后端按 `handler/v1/{terminal}/{module} -> service/{terminal}/{module} -> domain/repository` 组织。
+- 小程序 auth、house 读接口已接入。
+- publish 第一阶段 HMD 链路和 HPD 小程序 projector 已接入。
+- 下一步优先实现小程序 favorite/history/user。
 
 ## 修改规则
 
 1. 不做兼容旧数据库或旧前端的逻辑。
-2. 不大范围重构 Wire，除非当前链路必须接入。
+2. Wire provider 按职责拆分，domain/provider 不放进 publish 专属 provider 文件。
 3. 新增 model 时按 `domain.go / domain_enum.go / domain_validation.go` 拆。
 4. 新增 repository 时按模块建目录，集合多时不要塞进一个大文件。
-5. 新增 publish 逻辑时，handler 只调 `PublishService`，不要直接调 HMD 子 service 或 repository。
+5. 新增 publish 逻辑时，handler 只调 `PublishService`，不要直接调 domain/hmd 或 repository。
 6. 新增字段约束时，同步 schema 和 model validation。
 7. 新增接口路径必须是 `POST /api/v1/{module}/{action}`，禁止 `/module/domain/action` 这类多级业务路径。
 
