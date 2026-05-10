@@ -1,6 +1,6 @@
 # Miniapp Search Flow
 
-当前小程序找房流程尚未完整落地。
+当前小程序找房读接口已按 HPD read model 接入。
 
 下一步先实现小程序 HPD，不先做后台管理 HPD 或房东端 HPD。
 
@@ -9,8 +9,8 @@
 ```text
 小程序
   -> Go 后端房源查询 API
-    -> handler/v1/house
-      -> service/house
+    -> handler/v1/miniapp/house
+      -> service/miniapp/house
         -> repository/hpd.MiniappListingRepository
           -> hs_hpd_miniapp_listing
 ```
@@ -19,9 +19,9 @@ HPD 未完成前，不应让小程序直接依赖 HMD 主数据结构。
 
 边界约束：
 
-- `house` 是对外 API 模块；`miniapp` 是端类型，不作为 Go 后端 service / handler 包名。
-- `service/house` 只读 HPD read model，不读 HMD。
-- `handler/v1/house` 不直接调用 `repository/hpd`，也不调用 `service/hpd` projector。
+- `house` 是对外 API 模块；`miniapp` 是端类型，用于代码目录分组，不进入 URL。
+- `service/miniapp/house` 只读 HPD read model，不读 HMD。
+- `handler/v1/miniapp/house` 不直接调用 `repository/hpd`，也不调用 `service/hpd` projector。
 - `service/hpd` 继续只负责 HPD projection / lifecycle / `Apply(changes)`。
 
 ## 写入来源

@@ -89,7 +89,7 @@ POST /api/v1/user/profile
 因此 service 不再强行抽象成一套全局业务 service：
 
 ```text
-internal/service/house
+internal/service/miniapp/house
 internal/service/user
 internal/service/auth
 ```
@@ -209,14 +209,14 @@ handler/v1/admin/{module}
 
 ### 5.1 第一阶段：小程序 house 结构归位
 
-当前已有：
+迁移前已有：
 
 ```text
 internal/handler/v1/house
 internal/service/house
 ```
 
-需要迁到：
+已迁到：
 
 ```text
 internal/handler/v1/miniapp/house
@@ -235,6 +235,8 @@ Wire 注册同步调整为：
 ```text
 MiniappHouseSet
 ```
+
+当前状态：已完成。
 
 ### 5.2 第二阶段：HMD / HPD domain 化
 

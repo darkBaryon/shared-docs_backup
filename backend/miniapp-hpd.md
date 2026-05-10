@@ -247,14 +247,14 @@ internal/handler/v1/miniapp/
 
 - `miniapp` 是前端端类型，不是后端业务模块。
 - 对外 API 模块已经确认是 `house`，不是 `miniapp`。
-- 后续还会有 `favorite`、`history`、`user` 等小程序端接口，如果都塞进 `service/miniapp`，会形成端类型大杂烩。
+- 后续还会有 `favorite`、`history`、`user` 等小程序端接口，必须继续按 `service/miniapp/{module}` 拆分，不能塞进 `service/miniapp` 单个大包。
 - HPD 是内部展示层 read model，不是对外 API 模块；`service/hpd` 应继续只负责 projection / lifecycle / `Apply(changes)`，不承载小程序读 API。
 
 最终依赖链必须是：
 
 ```text
-handler/v1/house
-  -> service/house
+handler/v1/miniapp/house
+  -> service/miniapp/house
     -> repository/hpd.MiniappListingRepository
       -> hs_hpd_miniapp_listing
 ```
@@ -265,7 +265,7 @@ handler/v1/house
 handler -> service/hpd projector
 handler -> repository/hpd
 handler -> hmd
-service/house -> hmd
+service/miniapp/house -> hmd
 ```
 
 ## 8. 最终目录结构
@@ -353,10 +353,10 @@ internal/service/hpd/
 
 ### 8.4 House Read Service
 
-小程序找房读接口按业务模块放在 `service/house`：
+小程序找房读接口按“端侧 + API 模块”放在 `service/miniapp/house`：
 
 ```text
-internal/service/house/
+internal/service/miniapp/house/
   service.go
   search.go
   search_types.go
@@ -407,15 +407,15 @@ internal/service/house/
 
 约束：
 
-- `service/house` 只能依赖 `repository/hpd.MiniappListingRepository`。
-- `service/house` 不能依赖 HMD repository / HMD service。
-- `service/house` 不能调用 `service/hpd` projector。
-- `service/house` 返回业务结果，不直接返回 `model.HpdMiniappListing`。
+- `service/miniapp/house` 只能依赖 `repository/hpd.MiniappListingRepository`。
+- `service/miniapp/house` 不能依赖 HMD repository / HMD service。
+- `service/miniapp/house` 不能调用 `service/hpd` projector。
+- `service/miniapp/house` 返回业务结果，不直接返回 `model.HpdMiniappListing`。
 
 ### 8.5 House Handler
 
 ```text
-internal/handler/v1/house/
+internal/handler/v1/miniapp/house/
   handler.go
   routes.go
   search.go
@@ -436,22 +436,22 @@ internal/handler/v1/house/
   - 注册 `POST /api/v1/house/search`。
   - 注册 `POST /api/v1/house/public_detail`。
 - `search.go`
-  - HTTP handler：绑定请求、转 service input、调用 `service/house.Search`、返回响应。
+  - HTTP handler：绑定请求、转 service input、调用 `service/miniapp/house.Search`、返回响应。
 - `search_request.go`
   - 定义 snake_case HTTP request。
   - 做 JSON bind 后的基础转换。
 - `search_response.go`
   - 定义 snake_case API response DTO。
-  - `service/house.SearchResult -> API response`。
+  - `service/miniapp/house.SearchResult -> API response`。
   - 分页响应必须是 `data.list/page/page_size/total`。
 - `detail.go`
-  - HTTP handler：绑定请求、解析 `listing_id` ObjectID、调用 `service/house.GetPublicDetail`、返回响应。
+  - HTTP handler：绑定请求、解析 `listing_id` ObjectID、调用 `service/miniapp/house.GetPublicDetail`、返回响应。
 - `detail_request.go`
   - 定义 `listing_id` 请求结构。
   - 做 ObjectID 解析。
 - `detail_response.go`
   - 定义 snake_case API response DTO。
-  - `service/house.DetailResult -> API response`。
+  - `service/miniapp/house.DetailResult -> API response`。
 
 约束：
 
@@ -511,7 +511,7 @@ wire/providers_house.go
 建议内容：
 
 ```text
-HouseSet = wire.NewSet(
+MiniappHouseSet = wire.NewSet(
   HpdRepositorySet 或 newHpdMiniappListingRepository,
   housesvc.NewHouseService,
   househandler.NewHouseHandler,
@@ -522,7 +522,7 @@ HouseSet = wire.NewSet(
 
 路由注册：
 
-- `handler/v1/house` 注册到 public `/api/v1` route group。
+- `handler/v1/miniapp/house` 注册到 public `/api/v1` route group。
 - `POST /api/v1/house/search` 是公开接口。
 - `POST /api/v1/house/public_detail` 是公开接口。
 - 不挂强制 auth middleware。
@@ -630,9 +630,9 @@ is_online_1_weight_score_-1_updated_at_-1
    - `asset_mode`
    - `keyword`
    - `feature_flags`
-2. 实现 `internal/service/house`。
-3. 实现 `internal/handler/v1/house`。
-4. Wire 接入 `HouseSet`。
+2. 实现 `internal/service/miniapp/house`。
+3. 实现 `internal/handler/v1/miniapp/house`。
+4. Wire 接入 `MiniappHouseSet`。
 5. 注册 `house/search`、`house/public_detail` 到 public `/api/v1` route group。
 6. 补 repository / service / handler 测试。
 7. 用 seed 或 fixture 创建 `listing_status=3` 的 HPD 数据并刷新 projection。
@@ -644,8 +644,8 @@ is_online_1_weight_score_-1_updated_at_-1
 - `hmd.Service` 不直接依赖 HPD。
 - projector 根据 HMD 当前源数据重建 HPD，不接收 handler 拼好的展示字段。
 - `service/hpd` 继续只负责 projection / lifecycle / `Apply(changes)`。
-- `service/house` 负责小程序找房读查询。
-- `handler/v1/house` 是对外 API 层，包名跟 API 模块 `house` 保持一致。
+- `service/miniapp/house` 负责小程序找房读查询。
+- `handler/v1/miniapp/house` 是小程序端 API 层；目录按端侧分组，路由仍按 API 模块 `house` 保持 `/api/v1/house/*`。
 - 小程序接口请求和响应字段必须使用 snake_case。
 - 不得直接返回 Go model JSON。
 - `house/search` 分页响应必须放在 `data` 内，不使用 `response.SuccessPage`。
