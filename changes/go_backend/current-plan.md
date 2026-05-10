@@ -120,55 +120,92 @@ handler/v1/miniapp/house
 - handler 不直接调用 repository 或 domain projector。
 - miniapp API 请求和响应字段统一使用 `snake_case`。
 
+### 2.5 小程序用户资料、收藏、足迹
+
+已完成：
+
+```text
+internal/model/user_activity.go
+
+internal/repository/favorite
+internal/repository/history
+
+internal/service/miniapp/favorite
+internal/service/miniapp/history
+internal/service/miniapp/user
+
+internal/handler/v1/miniapp/favorite
+internal/handler/v1/miniapp/history
+internal/handler/v1/miniapp/user
+```
+
+已完成接口：
+
+- `POST /api/v1/user/profile`
+- `POST /api/v1/user/update_profile`
+- `POST /api/v1/user/dashboard`
+- `POST /api/v1/favorite/add`
+- `POST /api/v1/favorite/remove`
+- `POST /api/v1/favorite/list`
+- `POST /api/v1/history/add`
+- `POST /api/v1/history/list`
+
+落地口径：
+
+- `hs_usr_favorite.listing_id` 关联 `hs_hpd_listing._id`。
+- `hs_usr_history.listing_id` 关联 `hs_hpd_listing._id`。
+- 小程序收藏列表和足迹列表只展示仍在线的房源，即只返回 `hs_hpd_miniapp_listing.is_online=1` 的展示快照。
+- 收藏取消使用状态更新，不物理删除。
+- 足迹重复浏览同一房源时更新 `viewed_at` 和 `source`。
+- `source` 当前限制为 `discover` / `ai` / `detail`。
+- `favorite/add` 幂等：重复收藏返回成功。
+- `favorite/remove` 幂等：未收藏返回成功。
+- `history/list` 按 `viewed_at` 倒序。
+- `user/dashboard` 当前返回真实收藏数和足迹数；`plan_count`、`unread_notification_count` 为 `0`，等看房计划和通知模块实现。
+- 小程序响应字段使用 `snake_case`。
+- 分页响应为 `data.list/page/page_size/total`，不使用 `response.SuccessPage`。
+
+索引规划：
+
+```text
+hs_usr_favorite
+  user_id_1_listing_id_1 unique
+  user_id_1_status_1_updated_at_-1
+
+hs_usr_history
+  user_id_1_listing_id_1 unique
+  user_id_1_viewed_at_-1
+```
+
+`hs_usr_history.viewed_at` 的 90 天 TTL 暂不作为本阶段阻塞项；如果项目已有统一索引初始化入口，再一起补。
+
+验证情况：
+
+- `go test ./...` 通过。
+- 真实服务联调已验证：`user/profile`、`user/update_profile`、`user/dashboard`、`favorite/add`、`favorite/list`、`favorite/remove`、`history/add`、`history/list`。
+
+### 2.6 小程序 public_detail 可选登录
+
+已完成：
+
+- `POST /api/v1/house/public_detail` 仍是公开接口。
+- 匿名访问返回 `is_favorited=false`。
+- 带有效 token 时返回真实 `is_favorited`。
+- 无效 token 按匿名处理，避免公开详情因过期 token 无法打开。
+- 实现路径：
+  - `internal/middleware/optional_auth.go`
+  - `internal/service/miniapp/house` 通过窄接口查询 favorite 状态
+  - `internal/handler/v1/miniapp/house` 只对 `public_detail` 挂 optional auth
+
+验证情况：
+
+- 真实服务联调已验证：收藏后详情 `is_favorited=true`，取消收藏后详情 `is_favorited=false`，匿名详情 `is_favorited=false`。
+
 ## 3. 当前未完成
 
-### 3.1 小程序剩余接口
+### 3.1 管理端
 
-待实现：
-
-```text
-handler/v1/miniapp/user
-service/miniapp/user
-
-handler/v1/miniapp/favorite
-service/miniapp/favorite
-
-handler/v1/miniapp/history
-service/miniapp/history
-```
-
-对应接口以 [../../api/miniapp-api.md](../../api/miniapp-api.md) 为准。
-
-建议顺序：
-
-1. `repository/favorite`
-2. `repository/history`
-3. `service/miniapp/favorite`
-4. `service/miniapp/history`
-5. `service/miniapp/user`
-6. `handler/v1/miniapp/favorite`
-7. `handler/v1/miniapp/history`
-8. `handler/v1/miniapp/user`
-
-原因：
-
-- `user/dashboard` 需要收藏数和足迹数。
-- `house/public_detail` 的真实 `is_favorited` 需要 favorite 能力。
-
-### 3.2 小程序 public_detail 可选登录
-
-当前 `house/public_detail` 是公开接口。
-
-后续 favorite 完成后，需要支持：
-
-```text
-匿名访问：is_favorited=false
-带有效 token：返回真实 is_favorited
-```
-
-实现时应新增 optional auth 逻辑，不能直接挂强制 auth middleware。
-
-### 3.3 管理端
+后台管理端尚未开始实现。后续应独立设计：
 
 后台管理端尚未开始实现。后续应独立设计：
 
@@ -178,6 +215,13 @@ service/admin/*
 ```
 
 不能复用小程序或 publish 的端侧应用 service。
+
+### 3.2 小程序后续非第一阶段模块
+
+后续按业务优先级单独实现：
+
+- 看房计划。
+- 通知中心。
 
 ## 4. 当前重要文档
 

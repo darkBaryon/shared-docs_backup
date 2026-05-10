@@ -7,7 +7,7 @@
 3. [../backend/index.md](../backend/index.md)
 4. [../api/index.md](../api/index.md)
 5. [../schema/index.md](../schema/index.md)
-6. [../changes/migration/current-plan.md](../changes/migration/current-plan.md)
+6. [../changes/go_backend/current-plan.md](../changes/go_backend/current-plan.md)
 
 ## 工程边界
 
