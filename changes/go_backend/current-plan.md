@@ -132,6 +132,7 @@ internal/repository/history
 
 internal/service/miniapp/favorite
 internal/service/miniapp/history
+internal/service/miniapp/listingview
 internal/service/miniapp/user
 
 internal/handler/v1/miniapp/favorite
@@ -161,7 +162,11 @@ internal/handler/v1/miniapp/user
 - `favorite/add` 幂等：重复收藏返回成功。
 - `favorite/remove` 幂等：未收藏返回成功。
 - `history/list` 按 `viewed_at` 倒序。
-- `user/dashboard` 当前返回真实收藏数和足迹数；`plan_count`、`unread_notification_count` 为 `0`，等看房计划和通知模块实现。
+- `favorite/list`、`history/list` 的 `total` 与返回列表一致，只统计仍在线可展示房源。
+- `user/dashboard.favorite_count`、`user/dashboard.history_count` 与列表 `total` 口径一致，只统计仍在线可展示房源。
+- `user/update_profile` 是部分更新接口；未传字段保持原值，传空字符串或空数组表示主动清空。
+- `internal/service/miniapp/listingview` 承载小程序列表展示 DTO 和 HPD 映射，避免 favorite/history service 依赖 house service。
+- `plan_count`、`unread_notification_count` 当前为 `0`，等看房计划和通知模块实现。
 - 小程序响应字段使用 `snake_case`。
 - 分页响应为 `data.list/page/page_size/total`，不使用 `response.SuccessPage`。
 
@@ -177,11 +182,14 @@ hs_usr_history
   user_id_1_viewed_at_-1
 ```
 
-`hs_usr_history.viewed_at` 的 90 天 TTL 暂不作为本阶段阻塞项；如果项目已有统一索引初始化入口，再一起补。
+唯一索引由 Wire 仓库 provider 在应用启动初始化，避免接口首次写入前缺少约束。
+
+`hs_usr_history.viewed_at` 的 90 天 TTL 暂不作为本阶段阻塞项。
 
 验证情况：
 
 - `go test ./...` 通过。
+- 已补测试覆盖：`update_profile` 部分更新不清空未传字段、新用户无 profile ext 返回空偏好、dashboard/list 计数口径一致、favorite/history 当前全量加载后在线过滤分页、OptionalAuth 无效 token 按匿名处理。
 - 真实服务联调已验证：`user/profile`、`user/update_profile`、`user/dashboard`、`favorite/add`、`favorite/list`、`favorite/remove`、`history/add`、`history/list`。
 
 ### 2.6 小程序 public_detail 可选登录
@@ -200,6 +208,7 @@ hs_usr_history
 验证情况：
 
 - 真实服务联调已验证：收藏后详情 `is_favorited=true`，取消收藏后详情 `is_favorited=false`，匿名详情 `is_favorited=false`。
+- 单元测试已覆盖：无效 token 按匿名处理。
 
 ## 3. 当前未完成
 
