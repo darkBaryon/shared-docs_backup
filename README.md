@@ -8,15 +8,18 @@
 - Go 后端代码应该按什么边界实现
 - 接下来该做什么
 
-## 先看这 5 个文件
+## 先看这 6 个文件
 
 大多数任务先读这几个就够了：
 
-1. [changes/migration/current-plan.md](./changes/migration/current-plan.md)：当前迁移状态、已完成事项、下一步。
+1. [changes/go_backend/current-plan.md](./changes/go_backend/current-plan.md)：Go 后端迁移状态、已完成事项、下一步。
 2. [api/miniapp-api.md](./api/miniapp-api.md)：小程序接口契约。
 3. [api/publish.md](./api/publish.md)：发房端接口契约。
 4. [backend/architecture.md](./backend/architecture.md)：Go 后端分层和代码边界。
 5. [schema/db-design/v4/index.md](./schema/db-design/v4/index.md)：数据库设计入口。
+6. [frontend/development-spec.md](./frontend/development-spec.md)：前端目标架构、分层和目录规范。
+
+小程序前端 HPD 和架构迁移计划见 [changes/miniapp/current-plan.md](./changes/miniapp/current-plan.md)。
 
 ## 当前后端形态
 
@@ -71,7 +74,8 @@ handler/v1/publish
 - [schema/](./schema/index.md)：数据库字段、枚举、索引。
 - [backend/](./backend/index.md)：Go 后端实现边界。
 - [flows/](./flows/index.md)：跨模块链路，例如发房到 HPD、小程序找房。
-- [changes/migration/](./changes/migration/index.md)：当前迁移状态和下一步计划。
+- [changes/go_backend/](./changes/go_backend/current-plan.md)：Go 后端迁移状态和下一步计划。
+- [changes/miniapp/](./changes/miniapp/current-plan.md)：小程序前端 HPD 和架构迁移计划。
 - [agents/](./agents/index.md)：不同 Agent 接手任务前的工作规则。
 - [product/](./product/index.md)、[frontend/](./frontend/index.md)、[overview/](./overview/index.md)：产品和前端背景，需要时再读。
 
@@ -80,4 +84,4 @@ handler/v1/publish
 - 不维护统一大而全的 OpenAPI 文件。
 - 不维护历史 endpoint map。
 - 已废弃接口、旧字段、旧路径说明应删除，不长期堆在 changes 里。
-- 如果文档之间冲突，以 `api/`、`schema/`、`changes/migration/current-plan.md` 为准。
+- 如果文档之间冲突，以 `api/`、`schema/`、`changes/go_backend/current-plan.md`、`changes/miniapp/current-plan.md` 为准。

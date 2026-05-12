@@ -836,3 +836,28 @@ POST /api/v1/history/list
 | `short_one_month` | 一个月起租 |
 | `short_three_month` | 三个月起租 |
 | `daily` | 日租 |
+
+### 8.6 `feature_flags`
+
+`feature_flags` 是小程序第一期结构化筛选字段。
+
+适用位置：
+
+- `POST /api/v1/house/search` 请求字段 `feature_flags`
+- `MiniappListingItem.feature_flags`
+- `MiniappListingDetail.feature_flags`
+
+前端只能提交下表中的值。后端查询语义为：请求中每一个 `feature_flags` 值都必须在房源快照的 `feature_flags` 中存在。
+
+| 值 | 前端展示文案 | 后端匹配语义 | 说明 |
+| --- | --- | --- | --- |
+| `subway` | 近地铁 | 房源 `feature_flags` 包含 `subway` | 用于原 `near_subway` 筛选 |
+| `elevator` | 有电梯 | 房源 `feature_flags` 包含 `elevator` | 用于原 `has_elevator` 筛选 |
+| `pet_friendly` | 可养宠 | 房源 `feature_flags` 包含 `pet_friendly` | 用于原 `pet_friendly` 筛选 |
+| `cooking_allowed` | 可做饭 | 房源 `feature_flags` 包含 `cooking_allowed` | 用于原 `cooking_allowed` 筛选 |
+
+约束：
+
+- 未出现在本表中的值，前端不得提交。
+- 后端收到未知值应返回参数错误。
+- `feature_flags` 只表达结构化筛选，不替代 `platform_tags` 的运营展示标签。

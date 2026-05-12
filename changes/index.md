@@ -4,6 +4,7 @@
 
 已废弃接口、旧 endpoint map、阶段性流水账不在这里长期保留。
 
-## 迁移
+## 当前计划
 
-- [migration/current-plan.md](./migration/current-plan.md)
+- [go_backend/current-plan.md](./go_backend/current-plan.md)
+- [miniapp/current-plan.md](./miniapp/current-plan.md)
