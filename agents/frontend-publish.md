@@ -3,10 +3,12 @@
 ## 必读
 
 1. [global.md](./global.md)
-2. [../product/publish.md](../product/publish.md)
-3. [../api/publish.md](../api/publish.md)
-4. [../schema/db-design/v4/modules/house-master-data.md](../schema/db-design/v4/modules/house-master-data.md)
-5. [../flows/publish-listing.md](../flows/publish-listing.md)
+2. [../changes/publish_web/current-plan.md](../changes/publish_web/current-plan.md)
+3. [../frontend/publish.md](../frontend/publish.md)
+4. [../product/publish.md](../product/publish.md)
+5. [../api/publish.md](../api/publish.md)
+6. [../schema/db-design/v4/modules/house-master-data.md](../schema/db-design/v4/modules/house-master-data.md)
+7. [../flows/publish-listing.md](../flows/publish-listing.md)
 
 ## 工作规则
 

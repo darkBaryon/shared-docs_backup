@@ -8,3 +8,4 @@
 
 - [go_backend/current-plan.md](./go_backend/current-plan.md)
 - [miniapp/current-plan.md](./miniapp/current-plan.md)
+- [publish_web/current-plan.md](./publish_web/current-plan.md)
