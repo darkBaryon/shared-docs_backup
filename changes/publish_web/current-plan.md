@@ -731,6 +731,7 @@ image_tags
 - 已建立 `utils/request.ts`、`utils/http.ts`、`utils/authToken.ts`，请求路径为 `/api/v1 + /publish/{action}`，业务成功以 `code === 0` 判定。
 - 已建立 dev-only token panel；仅当 `VITE_ENABLE_DEV_TOKEN_PANEL=true` 且处于 dev 模式时展示。
 - 已建立枚举常量、展示 mapper 和基础全局样式。
+- 已补齐集中式楼栋、房型、房间以及分散式小区、房间的业务页面目录和路由落点；未实现的页面暂保留模块占位内容。
 - `npm run build` 已通过；Vite 仍有首包大于 500 kB 的提示，当前阶段暂不拆包。
 
 下一步进入 `13.3 Centralized MVP`，先实现集中式项目 list/create/detail/update，再接楼栋、房型、房间链路。
