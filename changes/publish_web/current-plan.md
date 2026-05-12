@@ -228,7 +228,7 @@ src/
 - 前端 API / model 文件：按业务对象命名，例如 `api/centralizedProject.ts`、`model/centralizedProject.ts`
 - 仓库语义：出房 Web 独立仓库
 
-API path 中出现 `publish`：
+API path 使用业务 module / action，不使用端侧名 `publish`：
 
 ```text
 POST /api/v1/centralized_project/create
@@ -442,10 +442,10 @@ dev token panel 约束：
 接口：
 
 ```text
-create_centralized_project
-centralized_project_detail
-update_centralized_project
-list_centralized_projects
+/centralized_project/create
+/centralized_project/detail
+/centralized_project/update
+/centralized_project/list
 ```
 
 页面能力：
@@ -472,10 +472,10 @@ brand_name
 接口：
 
 ```text
-create_building
-building_detail
-update_building
-list_buildings_by_project
+/building/create
+/building/detail
+/building/update
+/building/list_by_project
 ```
 
 页面能力：
@@ -508,11 +508,11 @@ listing_facilities
 接口：
 
 ```text
-create_room_type
-room_type_detail
-update_room_type
-list_room_types_by_project
-list_room_types_by_building
+/room_type/create
+/room_type/detail
+/room_type/update
+/room_type/list_by_project
+/room_type/list_by_building
 ```
 
 页面能力：
@@ -534,12 +534,12 @@ list_room_types_by_building
 接口：
 
 ```text
-create_centralized_room
-centralized_room_detail
-update_centralized_room
-update_centralized_room_status
-list_centralized_rooms_by_project
-list_centralized_rooms_by_building
+/centralized_room/create
+/centralized_room/detail
+/centralized_room/update
+/centralized_room/update_status
+/centralized_room/list_by_project
+/centralized_room/list_by_building
 ```
 
 页面能力：
@@ -563,12 +563,10 @@ list_centralized_rooms_by_building
 接口：
 
 ```text
-create_decentralized_community
-decentralized_community_detail
-update_decentralized_community
-list_decentralized_communities
-list_decentralized_communities_by_city
-list_decentralized_communities_by_district
+/decentralized_community/create
+/decentralized_community/detail
+/decentralized_community/update
+/decentralized_community/list
 ```
 
 页面能力：
@@ -595,11 +593,11 @@ subway_station
 接口：
 
 ```text
-create_decentralized_room
-decentralized_room_detail
-update_decentralized_room
-update_decentralized_room_status
-list_decentralized_rooms_by_community
+/decentralized_room/create
+/decentralized_room/detail
+/decentralized_room/update
+/decentralized_room/update_status
+/decentralized_room/list_by_community
 ```
 
 页面能力：
@@ -856,7 +854,7 @@ Handler 改造：
 2. `list_*` 调 service 后转换为 `{ "list": [...] }`。
 3. 各子包 handler 可以复用 `common.WriteResult` / `common.BindJSON` / ObjectID 解析，避免重复错误处理。
 4. request DTO 放在各业务子包 `dto.go`，仅做契约核对：
-   - `create_centralized_room` / `create_decentralized_room` 不接收 `room_status`。
+   - `/centralized_room/create` / `/decentralized_room/create` 不接收 `room_status`。
    - `update_*` 保持全量保存语义。
    - `list_*` 不接收 `page` / `page_size`。
    - `taggedImageRequest.tag` 可为空，用于可选图片标签。
@@ -875,8 +873,8 @@ Handler 改造：
    - response 不包含 `room_type_id`。
    - create/update request 不解析 `room_type_id`。
 5. 增加 status 更新测试：
-   - `update_centralized_room_status` 返回完整 `centralizedRoomResponse`。
-   - `update_decentralized_room_status` 返回完整 `decentralizedRoomResponse`。
+   - `/centralized_room/update_status` 返回完整 `centralizedRoomResponse`。
+   - `/decentralized_room/update_status` 返回完整 `decentralizedRoomResponse`。
 6. 保留现有错误码测试，确保 invalid JSON、invalid ObjectID、not found、already exists、database error 行为不变。
 
 验证命令：
@@ -941,11 +939,16 @@ go test ./...
 当前落地状态（2026-05-12）：
 
 - 已完成 `centralized-project` list/create/detail/update 页面。
-- 项目列表要求输入 `city` 后调用 `list_centralized_projects`，不在前端伪造动态数据。
+- 项目列表要求输入 `city` 后调用 `/centralized_project/list`，不在前端伪造动态数据。
 - 创建/编辑表单按 publish DTO 提交 `snake_case` 字段，`project_code` 仅创建时可填。
 - 项目详情页提供楼栋、房型、房间上下文入口。
-- 已完成 `building` list/create/update 页面；楼栋列表按项目调用 `list_buildings_by_project`，表单按楼栋图片规则提交 `photos: string[]`。
-- `npm run build` 已通过；下一步继续实现 `room-type` list/create/update。
+- 已完成 `building` list/create/update 页面；楼栋列表按项目调用 `/building/list_by_project`，表单按楼栋图片规则提交 `photos: string[]`。
+- 已完成 `room-type` list/create/update 页面；房型图片按 `images: { url, tag? }[]` 提交。
+- 已完成 `centralized-room` list/create/update/status 页面；集中式房间保留可选 `room_type_id`。
+- 已完成 `decentralized-community` list/create/detail/update 页面。
+- 已完成 `decentralized-room` list/create/update/status 页面；分散式房间 request 和页面 payload 不包含 `room_type_id`。
+- 前端 API 封装已按 `/api/v1/{business_module}/{action}` 对齐，不保留 `/api/v1/publish/*` 兼容路径。
+- `npm run build` 已通过；下一步进入真实后端 E2E 和 DTO 偏差记录。
 
 ### 13.4 Decentralized MVP
 
