@@ -103,7 +103,7 @@ Axios
 
 - 代码按未来独立出房 Web 仓库结构编写。
 - 未来独立仓库结构优先参考当前后台 Web `feature_20260312` 分支的轻量架构。
-- 不使用 `src/publish/` 作为最终目录结构；API module 叫 `publish` 不代表前端目录必须叫 `publish`。
+- 不使用 `src/publish/` 作为最终目录结构；API module 使用业务对象名，不使用端侧名 `publish`。
 - 不为了临时分支设计额外兼容层或迁出适配层。
 - 明天新仓库初始化后，直接迁移 `src/` 下相关代码。
 - 临时分支后续删除。
@@ -223,7 +223,7 @@ src/
 
 需要明确区分：
 
-- API module：`publish`
+- API module：业务对象，例如 `centralized_project`、`building`、`room_type`、`centralized_room`、`decentralized_community`、`decentralized_room`
 - 前端页面模块：`views/centralized/project`、`views/centralized/building`、`views/centralized/roomType`、`views/centralized/room`、`views/decentralized/community`、`views/decentralized/room`
 - 前端 API / model 文件：按业务对象命名，例如 `api/centralizedProject.ts`、`model/centralizedProject.ts`
 - 仓库语义：出房 Web 独立仓库
@@ -231,13 +231,13 @@ src/
 API path 中出现 `publish`：
 
 ```text
-POST /api/v1/publish/create_centralized_project
+POST /api/v1/centralized_project/create
 ```
 
 只应该体现在 API 封装里：
 
 ```ts
-post('/publish/create_centralized_project', payload)
+post('/centralized_project/create', payload)
 ```
 
 不应该决定前端目录叫 `src/publish/`。
@@ -258,7 +258,7 @@ post('/publish/create_centralized_project', payload)
 接口统一走：
 
 ```text
-POST /api/v1/publish/{action}
+POST /api/v1/{business_module}/{action}
 ```
 
 后端当前状态：
@@ -304,8 +304,8 @@ interface ApiResponse<T> {
 API 层只写业务短路径，例如：
 
 ```text
-/publish/create_centralized_project
-/publish/list_centralized_projects
+/centralized_project/create
+/centralized_project/list
 ```
 
 禁止：
@@ -714,7 +714,7 @@ image_tags
 
 - `internal/handler/v1/miniapp/*/response.go` 已采用 handler response DTO + mapper 的结构，对外响应字段明确写 `json:"snake_case"`。
 - `internal/handler/v1/publish` 当前请求 DTO 已基本使用 `snake_case`，但响应直接返回 `model.Hmd*`，会暴露 `projectName`、`createdAt`、`roomTypeId` 等 camelCase 字段。
-- 现有 publish API 把端侧名 `publish` 放在 module 位，例如 `/api/v1/publish/create_building`，与 miniapp 的 `/api/v1/{业务module}/{action}` 不一致。
+- 现有 publish API 把端侧名 `publish` 放在 module 位，例如 `/api/v1/building/create`，与 miniapp 的 `/api/v1/{业务module}/{action}` 不一致。
 - publish 第一阶段应沿用 miniapp 同类实现思路：service/domain 保持业务对象和内部模型，handler 层按业务 module 分包，负责稳定 API DTO，不新增另一套跨端结构。
 
 API 命名调整：
@@ -916,7 +916,7 @@ go test ./...
 
 - 已建立 `main.ts`、`App.vue`、路由、Layout、工作台、第一期模块菜单和占位路由。
 - 已建立按业务对象拆分的 `api/*` 与 `model/*`，DTO 使用 `snake_case`。
-- 已建立 `utils/request.ts`、`utils/http.ts`、`utils/authToken.ts`，请求路径为 `/api/v1 + /publish/{action}`，业务成功以 `code === 0` 判定。
+- 已建立 `utils/request.ts`、`utils/http.ts`、`utils/authToken.ts` 后，请求路径为 `/api/v1 + /{业务module}/{action}`，业务成功以 `code === 0` 判定。
 - 已建立 dev-only token panel；仅当 `VITE_ENABLE_DEV_TOKEN_PANEL=true` 且处于 dev 模式时展示。
 - 已建立枚举常量、展示 mapper 和基础全局样式。
 - 已补齐集中式楼栋、房型、房间以及分散式小区、房间的业务页面目录和路由落点；未实现的页面暂保留模块占位内容。
@@ -1025,23 +1025,23 @@ DELETE /api
 应出现：
 
 ```text
-POST /api/v1/publish/create_centralized_project
-POST /api/v1/publish/list_centralized_projects
-POST /api/v1/publish/create_building
-POST /api/v1/publish/create_room_type
-POST /api/v1/publish/create_centralized_room
-POST /api/v1/publish/update_centralized_room_status
-POST /api/v1/publish/create_decentralized_community
-POST /api/v1/publish/create_decentralized_room
-POST /api/v1/publish/update_decentralized_room_status
+POST /api/v1/centralized_project/create
+POST /api/v1/centralized_project/list
+POST /api/v1/building/create
+POST /api/v1/room_type/create
+POST /api/v1/centralized_room/create
+POST /api/v1/centralized_room/update_status
+POST /api/v1/decentralized_community/create
+POST /api/v1/decentralized_room/create
+POST /api/v1/decentralized_room/update_status
 ```
 
 不应出现：
 
 ```text
-GET /api/v1/publish/*
-PUT /api/v1/publish/*
-DELETE /api/v1/publish/*
+GET /api/v1/*
+PUT /api/v1/*
+DELETE /api/v1/*
 POST /api/v1/house/create
 ```
 

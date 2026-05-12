@@ -278,7 +278,7 @@ Service 不应成为 API 层和 Model 层的混合体。
 - 基础域名来自环境变量，例如 `VITE_API_BASE_URL`。
 - 公共前缀统一为 `/api/v1`。
 - `api/*` 中统一写业务短路径，例如 `"/house/search"`。
-- 业务短路径必须是 `/{模块}/{动作}`，例如 `"/house/search"`、`"/publish/create_centralized_project"`。
+- 业务短路径必须是 `/{模块}/{动作}`，例如 `"/house/search"`、`"/centralized_project/create"`。
 
 禁止：
 

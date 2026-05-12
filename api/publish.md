@@ -14,7 +14,7 @@
 路径命名遵守 [../overview/project-spec.md](../overview/project-spec.md)。
 
 ```text
-POST /api/v1/publish/{action}
+POST /api/v1/{business_module}/{action}
 ```
 
 约定：
@@ -301,7 +301,7 @@ interface PublishListResp<T> {
 
 `CentralizedProjectListItem = CentralizedProject`
 
-### 5.2 `POST /api/v1/publish/create_centralized_project`
+### 5.2 `POST /api/v1/centralized_project/create`
 
 请求：
 
@@ -317,13 +317,13 @@ interface PublishListResp<T> {
 
 响应：`ApiResponse<CentralizedProject>`
 
-### 5.3 `POST /api/v1/publish/centralized_project_detail`
+### 5.3 `POST /api/v1/centralized_project/detail`
 
 请求：`IDReq`
 
 响应：`ApiResponse<CentralizedProject>`
 
-### 5.4 `POST /api/v1/publish/update_centralized_project`
+### 5.4 `POST /api/v1/centralized_project/update`
 
 请求：
 
@@ -341,7 +341,7 @@ interface PublishListResp<T> {
 
 响应：`ApiResponse<CentralizedProject>`
 
-### 5.5 `POST /api/v1/publish/list_centralized_projects`
+### 5.5 `POST /api/v1/centralized_project/list`
 
 请求：
 
@@ -374,7 +374,7 @@ interface PublishListResp<T> {
 
 `BuildingListItem = Building`
 
-### 6.2 `POST /api/v1/publish/create_building`
+### 6.2 `POST /api/v1/building/create`
 
 请求：
 
@@ -391,13 +391,13 @@ interface PublishListResp<T> {
 
 响应：`ApiResponse<Building>`
 
-### 6.3 `POST /api/v1/publish/building_detail`
+### 6.3 `POST /api/v1/building/detail`
 
 请求：`IDReq`
 
 响应：`ApiResponse<Building>`
 
-### 6.4 `POST /api/v1/publish/update_building`
+### 6.4 `POST /api/v1/building/update`
 
 请求：
 
@@ -415,7 +415,7 @@ interface PublishListResp<T> {
 
 响应：`ApiResponse<Building>`
 
-### 6.5 `POST /api/v1/publish/list_buildings_by_project`
+### 6.5 `POST /api/v1/building/list_by_project`
 
 请求：`ProjectIDReq`
 
@@ -453,7 +453,7 @@ interface PublishListResp<T> {
 
 `RoomTypeListItem = RoomType`
 
-### 7.2 `POST /api/v1/publish/create_room_type`
+### 7.2 `POST /api/v1/room_type/create`
 
 请求：
 
@@ -482,13 +482,13 @@ interface PublishListResp<T> {
 
 响应：`ApiResponse<RoomType>`
 
-### 7.3 `POST /api/v1/publish/room_type_detail`
+### 7.3 `POST /api/v1/room_type/detail`
 
 请求：`IDReq`
 
 响应：`ApiResponse<RoomType>`
 
-### 7.4 `POST /api/v1/publish/update_room_type`
+### 7.4 `POST /api/v1/room_type/update`
 
 请求：
 
@@ -516,13 +516,13 @@ interface PublishListResp<T> {
 
 响应：`ApiResponse<RoomType>`
 
-### 7.5 `POST /api/v1/publish/list_room_types_by_project`
+### 7.5 `POST /api/v1/room_type/list_by_project`
 
 请求：`ProjectIDReq`
 
 响应：`ApiResponse<PublishListResp<RoomTypeListItem>>`
 
-### 7.6 `POST /api/v1/publish/list_room_types_by_building`
+### 7.6 `POST /api/v1/room_type/list_by_building`
 
 请求：`BuildingIDReq`
 
@@ -564,7 +564,7 @@ interface PublishListResp<T> {
 
 `CentralizedRoomListItem = CentralizedRoom`
 
-### 8.2 `POST /api/v1/publish/create_centralized_room`
+### 8.2 `POST /api/v1/centralized_room/create`
 
 请求：
 
@@ -600,13 +600,13 @@ interface PublishListResp<T> {
 
 响应：`ApiResponse<CentralizedRoom>`
 
-### 8.3 `POST /api/v1/publish/centralized_room_detail`
+### 8.3 `POST /api/v1/centralized_room/detail`
 
 请求：`IDReq`
 
 响应：`ApiResponse<CentralizedRoom>`
 
-### 8.4 `POST /api/v1/publish/update_centralized_room`
+### 8.4 `POST /api/v1/centralized_room/update`
 
 请求：
 
@@ -636,7 +636,7 @@ interface PublishListResp<T> {
 
 响应：`ApiResponse<CentralizedRoom>`
 
-### 8.5 `POST /api/v1/publish/update_centralized_room_status`
+### 8.5 `POST /api/v1/centralized_room/update_status`
 
 请求：
 
@@ -647,13 +647,13 @@ interface PublishListResp<T> {
 
 响应：`ApiResponse<CentralizedRoom>`
 
-### 8.6 `POST /api/v1/publish/list_centralized_rooms_by_project`
+### 8.6 `POST /api/v1/centralized_room/list_by_project`
 
 请求：`ProjectIDReq`
 
 响应：`ApiResponse<PublishListResp<CentralizedRoomListItem>>`
 
-### 8.7 `POST /api/v1/publish/list_centralized_rooms_by_building`
+### 8.7 `POST /api/v1/centralized_room/list_by_building`
 
 请求：`BuildingIDReq`
 
@@ -680,7 +680,7 @@ interface PublishListResp<T> {
 
 `DecentralizedCommunityListItem = DecentralizedCommunity`
 
-### 9.2 `POST /api/v1/publish/create_decentralized_community`
+### 9.2 `POST /api/v1/decentralized_community/create`
 
 请求：
 
@@ -696,13 +696,13 @@ interface PublishListResp<T> {
 
 响应：`ApiResponse<DecentralizedCommunity>`
 
-### 9.3 `POST /api/v1/publish/decentralized_community_detail`
+### 9.3 `POST /api/v1/decentralized_community/detail`
 
 请求：`IDReq`
 
 响应：`ApiResponse<DecentralizedCommunity>`
 
-### 9.4 `POST /api/v1/publish/update_decentralized_community`
+### 9.4 `POST /api/v1/decentralized_community/update`
 
 请求：
 
@@ -719,7 +719,7 @@ interface PublishListResp<T> {
 
 响应：`ApiResponse<DecentralizedCommunity>`
 
-### 9.5 `POST /api/v1/publish/list_decentralized_communities`
+### 9.5 `POST /api/v1/decentralized_community/list`
 
 请求：
 
@@ -766,7 +766,7 @@ interface PublishListResp<T> {
 
 约束：分散式房间当前没有房型模型，request/response 均不得出现 `room_type_id`。
 
-### 10.2 `POST /api/v1/publish/create_decentralized_room`
+### 10.2 `POST /api/v1/decentralized_room/create`
 
 请求：
 
@@ -796,13 +796,13 @@ interface PublishListResp<T> {
 
 响应：`ApiResponse<DecentralizedRoom>`
 
-### 10.3 `POST /api/v1/publish/decentralized_room_detail`
+### 10.3 `POST /api/v1/decentralized_room/detail`
 
 请求：`IDReq`
 
 响应：`ApiResponse<DecentralizedRoom>`
 
-### 10.4 `POST /api/v1/publish/update_decentralized_room`
+### 10.4 `POST /api/v1/decentralized_room/update`
 
 请求：
 
@@ -832,7 +832,7 @@ interface PublishListResp<T> {
 
 响应：`ApiResponse<DecentralizedRoom>`
 
-### 10.5 `POST /api/v1/publish/update_decentralized_room_status`
+### 10.5 `POST /api/v1/decentralized_room/update_status`
 
 请求：
 
@@ -843,7 +843,7 @@ interface PublishListResp<T> {
 
 响应：`ApiResponse<DecentralizedRoom>`
 
-### 10.6 `POST /api/v1/publish/list_decentralized_rooms_by_community`
+### 10.6 `POST /api/v1/decentralized_room/list_by_community`
 
 请求：`DecentralizedIDReq`
 
@@ -854,7 +854,7 @@ interface PublishListResp<T> {
 后续发房系统扩展到 HPD 时，仍继续沿用：
 
 ```text
-POST /api/v1/publish/{action}
+POST /api/v1/{business_module}/{action}
 ```
 
 例如未来可新增：

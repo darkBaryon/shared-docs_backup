@@ -14,7 +14,7 @@
 ## 约定
 
 - 技术栈与后台 Web 端保持一致：Vue 3、Vite、TypeScript、SCSS、Element Plus、Pinia、Vue Router、Axios。
-- API 路径使用 `POST /api/v1/publish/{action}`。
+- API 路径使用 `POST /api/v1/{业务module}/{action}`；`publish` 是端侧系统名，不占用 API module 位。
 - 表单枚举值以 schema 为准。
 - 分散式房间当前不提供房型选择。
 - 发房系统和后台管理系统不是同一个前端。
