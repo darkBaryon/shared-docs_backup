@@ -749,6 +749,14 @@ image_tags
 4. `centralized-room` list/create/update/status。
 5. 级联选择：project -> building -> room type / room。
 
+当前落地状态（2026-05-12）：
+
+- 已完成 `centralized-project` list/create/detail/update 页面。
+- 项目列表要求输入 `city` 后调用 `list_centralized_projects`，不在前端伪造动态数据。
+- 创建/编辑表单按 publish DTO 提交 `snake_case` 字段，`project_code` 仅创建时可填。
+- 项目详情页提供楼栋、房型、房间上下文入口。
+- `npm run build` 已通过；下一步继续实现 `building` list/create/update。
+
 ### 13.4 Decentralized MVP
 
 目标：
