@@ -724,6 +724,17 @@ image_tags
 8. 建枚举常量和展示 mapper。
 9. 建 `src/assets/css/index.scss`、`common` 和业务模块样式入口。
 
+当前落地状态（2026-05-12）：
+
+- 已建立 `main.ts`、`App.vue`、路由、Layout、工作台、第一期模块菜单和占位路由。
+- 已建立按业务对象拆分的 `api/*` 与 `model/*`，DTO 使用 `snake_case`。
+- 已建立 `utils/request.ts`、`utils/http.ts`、`utils/authToken.ts`，请求路径为 `/api/v1 + /publish/{action}`，业务成功以 `code === 0` 判定。
+- 已建立 dev-only token panel；仅当 `VITE_ENABLE_DEV_TOKEN_PANEL=true` 且处于 dev 模式时展示。
+- 已建立枚举常量、展示 mapper 和基础全局样式。
+- `npm run build` 已通过；Vite 仍有首包大于 500 kB 的提示，当前阶段暂不拆包。
+
+下一步进入 `13.3 Centralized MVP`，先实现集中式项目 list/create/detail/update，再接楼栋、房型、房间链路。
+
 ### 13.3 Centralized MVP
 
 目标：
