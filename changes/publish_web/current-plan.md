@@ -706,6 +706,194 @@ image_tags
 
 未完成本阶段前，不进入页面实现。
 
+#### 13.1.1 Go 后端 publish DTO coding plan
+
+本计划用于修复当前 Go 后端 publish API 对外 DTO 与 [../../api/publish.md](../../api/publish.md) 不一致的问题。开始写代码前必须先按本节 review；实现完成后按本节逐项验收。
+
+当前分支对照结论：
+
+- `internal/handler/v1/miniapp/*/response.go` 已采用 handler response DTO + mapper 的结构，对外响应字段明确写 `json:"snake_case"`。
+- `internal/handler/v1/publish` 当前请求 DTO 已基本使用 `snake_case`，但响应直接返回 `model.Hmd*`，会暴露 `projectName`、`createdAt`、`roomTypeId` 等 camelCase 字段。
+- 现有 publish API 把端侧名 `publish` 放在 module 位，例如 `/api/v1/publish/create_building`，与 miniapp 的 `/api/v1/{业务module}/{action}` 不一致。
+- publish 第一阶段应沿用 miniapp 同类实现思路：service/domain 保持业务对象和内部模型，handler 层按业务 module 分包，负责稳定 API DTO，不新增另一套跨端结构。
+
+API 命名调整：
+
+publish API 不再使用 `/api/v1/publish/{action}`。module 位必须是业务对象，端侧来源由鉴权、权限和日志表达，不由 URL module 表达。
+
+目标路径：
+
+```text
+POST /api/v1/centralized_project/create
+POST /api/v1/centralized_project/detail
+POST /api/v1/centralized_project/update
+POST /api/v1/centralized_project/list
+
+POST /api/v1/building/create
+POST /api/v1/building/detail
+POST /api/v1/building/update
+POST /api/v1/building/list_by_project
+
+POST /api/v1/room_type/create
+POST /api/v1/room_type/detail
+POST /api/v1/room_type/update
+POST /api/v1/room_type/list_by_project
+POST /api/v1/room_type/list_by_building
+
+POST /api/v1/centralized_room/create
+POST /api/v1/centralized_room/detail
+POST /api/v1/centralized_room/update
+POST /api/v1/centralized_room/update_status
+POST /api/v1/centralized_room/list_by_project
+POST /api/v1/centralized_room/list_by_building
+
+POST /api/v1/decentralized_community/create
+POST /api/v1/decentralized_community/detail
+POST /api/v1/decentralized_community/update
+POST /api/v1/decentralized_community/list
+
+POST /api/v1/decentralized_room/create
+POST /api/v1/decentralized_room/detail
+POST /api/v1/decentralized_room/update
+POST /api/v1/decentralized_room/update_status
+POST /api/v1/decentralized_room/list_by_community
+```
+
+不保留 `/api/v1/publish/*` 兼容路径；本项目是全新项目，不为旧路径做兼容。
+
+实现范围：
+
+1. 只改 Go 后端 publish DTO 和测试，不进入出房 Web 页面实现。
+2. 同步修正 Go 后端路由和 [../../api/publish.md](../../api/publish.md) 中的接口路径。
+3. 不把 publish API 改成 RESTful，不新增 `GET` / `PUT` / `DELETE`。
+4. 不直接把 Go model JSON 作为正式 publish API response。
+5. 不改分散式房间契约：request / response 均不得出现 `room_type_id`。
+
+代码落点：
+
+```text
+internal/handler/v1/publish/
+  common/
+    bind.go
+    dto.go
+
+  project/
+    handler.go
+    dto.go
+    handler_test.go
+
+  building/
+    handler.go
+    dto.go
+    handler_test.go
+
+  roomtype/
+    handler.go
+    dto.go
+    handler_test.go
+
+  room/
+    handler.go
+    dto.go
+    handler_test.go
+
+  community/
+    handler.go
+    dto.go
+    handler_test.go
+
+  handler.go
+  routes.go
+```
+
+说明：
+
+- 顶层 `publish/handler.go` 只做聚合 registrar，外部 Wire 仍只注入一个 `PublishHandler`。
+- 子包按业务 module 划分，和 miniapp 的“按模块分包”方向一致。
+- 子包内用一个 `dto.go` 聚合 request DTO、response DTO 和 mapper，避免机械拆成每个包一套 `request.go` / `response.go`。
+- `room` 包同时承载 centralized room 和 decentralized room，因为字段高度重叠；但 DTO 类型必须分开，分散式 DTO 不得出现 `room_type_id`。
+- 不把对外 DTO 塞到 `model`、`service/publish` 或 `domain/hmd`。
+
+DTO 设计：
+
+1. 定义公共 response DTO：
+   - `entityMetaResponse`
+   - `geoPointResponse`
+   - `taggedImageResponse`
+   - `publishListResponse[T]`
+2. 定义业务 response DTO：
+   - `centralizedProjectResponse`
+   - `buildingResponse`
+   - `roomTypeResponse`
+   - `centralizedRoomResponse`
+   - `decentralizedCommunityResponse`
+   - `decentralizedRoomResponse`
+3. 所有 JSON tag 必须使用 `snake_case`。
+4. ObjectID 必须转换为 hex string。
+5. 枚举值按 API 契约输出原始枚举值，不输出中文文案。
+6. 数组字段在空值时返回 `[]`，不返回 `null`，用于前端稳定渲染。
+7. 可选 ObjectID 字段：
+   - 集中式 `room_type_id` 允许为空字符串。
+   - 房型 `project_id` / `building_id` 对应项目级或楼栋级房型，空值输出空字符串。
+   - 分散式房间不得定义或输出 `room_type_id`。
+
+Mapper 设计：
+
+1. 在各业务子包内新增 model -> response mapper。
+2. 单对象 mapper 命名统一：
+   - `toCentralizedProjectResponse`
+   - `toBuildingResponse`
+   - `toRoomTypeResponse`
+   - `toCentralizedRoomResponse`
+   - `toDecentralizedCommunityResponse`
+   - `toDecentralizedRoomResponse`
+3. 列表 mapper 返回 `publishListResponse[T]{list: []}`，不得返回裸数组。
+4. mapper 仅做 DTO 转换，不做业务校验，不访问 repository，不触发 projector。
+
+Handler 改造：
+
+1. `create_*`、`*_detail`、`update_*`、`update_*_status` 调 service 后先 mapper，再 `response.Success`。
+2. `list_*` 调 service 后转换为 `{ "list": [...] }`。
+3. 各子包 handler 可以复用 `common.WriteResult` / `common.BindJSON` / ObjectID 解析，避免重复错误处理。
+4. request DTO 放在各业务子包 `dto.go`，仅做契约核对：
+   - `create_centralized_room` / `create_decentralized_room` 不接收 `room_status`。
+   - `update_*` 保持全量保存语义。
+   - `list_*` 不接收 `page` / `page_size`。
+   - `taggedImageRequest.tag` 可为空，用于可选图片标签。
+
+测试计划：
+
+1. 按业务子包拆分测试文件，避免继续堆大 `publish/handler_test.go`。
+2. 增加响应字段测试：
+   - 不出现 `projectName`、`buildingName`、`createdAt`、`updatedAt`、`roomTypeId`。
+   - 出现 `project_name`、`building_name`、`created_at`、`updated_at`、`room_type_id`。
+3. 增加列表响应测试：
+   - `data.list` 是数组。
+   - 空列表返回 `data.list=[]`。
+   - 列表不是裸数组。
+4. 增加分散式房间专项测试：
+   - response 不包含 `room_type_id`。
+   - create/update request 不解析 `room_type_id`。
+5. 增加 status 更新测试：
+   - `update_centralized_room_status` 返回完整 `centralizedRoomResponse`。
+   - `update_decentralized_room_status` 返回完整 `decentralizedRoomResponse`。
+6. 保留现有错误码测试，确保 invalid JSON、invalid ObjectID、not found、already exists、database error 行为不变。
+
+验证命令：
+
+```text
+go test ./internal/handler/v1/publish/... ./internal/service/publish
+go test ./...
+```
+
+完成标准：
+
+1. publish response 全部符合 [../../api/publish.md](../../api/publish.md) 的 `snake_case` DTO。
+2. publish list response 全部符合 `ApiResponse<PublishListResp<T>>`。
+3. 后端不再向前端暴露 HMD Go model 的 camelCase JSON。
+4. Go 测试通过。
+5. 本节验收项全部满足后，才能进入 `13.2 Frontend Skeleton`。
+
 ### 13.2 Frontend Skeleton
 
 目标：
