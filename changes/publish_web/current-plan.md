@@ -756,7 +756,8 @@ image_tags
 - 项目列表要求输入 `city` 后调用 `list_centralized_projects`，不在前端伪造动态数据。
 - 创建/编辑表单按 publish DTO 提交 `snake_case` 字段，`project_code` 仅创建时可填。
 - 项目详情页提供楼栋、房型、房间上下文入口。
-- `npm run build` 已通过；下一步继续实现 `building` list/create/update。
+- 已完成 `building` list/create/update 页面；楼栋列表按项目调用 `list_buildings_by_project`，表单按楼栋图片规则提交 `photos: string[]`。
+- `npm run build` 已通过；下一步继续实现 `room-type` list/create/update。
 
 ### 13.4 Decentralized MVP
 
