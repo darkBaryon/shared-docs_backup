@@ -63,7 +63,7 @@ Miniapp API 请求和响应字段统一使用 `snake_case`。
 Authorization: Bearer <token>
 ```
 
-`house/public_detail` 允许匿名访问。匿名访问时 `is_favorited=false`；如果请求带有效 token，后端返回真实收藏状态。
+`house/public_detail` 允许匿名访问。匿名或无效 token 访问时 `is_favorited=false`；如果请求带有效 token，后端返回真实收藏状态。
 
 token 是后端签发的 opaque Redis session token，不是 JWT。前端只需要原样放入 `Authorization: Bearer <token>`，不要解析 token 内容，也不要依赖 token 自身判断过期。
 
@@ -319,6 +319,8 @@ POST /api/v1/user/update_profile
 
 鉴权：需要 Bearer token。
 
+语义：部分更新。未出现在请求体中的字段保持原值；传入空字符串或空数组表示主动清空该字段。
+
 请求：
 
 | 字段 | 类型 | 必填 | 说明 |
@@ -384,8 +386,8 @@ POST /api/v1/user/dashboard
 
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
-| `favorite_count` | int | 收藏房源数 |
-| `history_count` | int | 浏览足迹数 |
+| `favorite_count` | int | 收藏房源数，只统计仍在线可展示房源 |
+| `history_count` | int | 浏览足迹数，只统计仍在线可展示房源 |
 | `plan_count` | int | 看房计划数 |
 | `unread_notification_count` | int | 未读通知数 |
 
@@ -493,7 +495,7 @@ POST /api/v1/house/public_detail
 
 用途：房源详情页。
 
-鉴权：公开；带有效 token 时返回真实 `is_favorited`。
+鉴权：公开；带有效 token 时返回真实 `is_favorited`。无 token、无效 token、过期 token 均按匿名处理，返回 `is_favorited=false`。
 
 读取：只读 `hs_hpd_miniapp_listing`。
 
@@ -691,7 +693,7 @@ POST /api/v1/favorite/list
 }
 ```
 
-说明：列表只返回仍在线的房源；已下架房源不在小程序收藏列表展示。
+说明：列表只返回仍在线的房源；已下架房源不在小程序收藏列表展示。`total` 与 `list` 口径一致，只统计仍在线可展示房源。
 
 ## 7. 足迹
 
@@ -784,7 +786,7 @@ POST /api/v1/history/list
 }
 ```
 
-说明：足迹按 `viewed_at` 倒序；只返回仍在线的房源。
+说明：足迹按 `viewed_at` 倒序；只返回仍在线的房源。`total` 与 `list` 口径一致，只统计仍在线可展示房源。
 
 ## 8. 字段枚举
 

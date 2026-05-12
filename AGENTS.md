@@ -44,9 +44,9 @@
 5. 数据库变更必须同时更新：
    - `schema/db-design/`
    - `schema/backend-crud/`
-6. 若当前实现或最终策略与历史输入存在差异，直接更新对应规范文档和 `changes/migration/current-plan.md`。
+6. 若当前实现或最终策略与历史输入存在差异，直接更新对应规范文档和 `changes/go_backend/current-plan.md`。
 7. 链接使用相对路径。
-8. 所有迁移状态和计划统一维护在 `changes/migration/current-plan.md`；计划完成后必须更新这个文件，写清已完成事项、实际落地路径，以及实现与计划不一致时的最终决策。
+8. 所有迁移状态和计划统一维护在 `changes/go_backend/current-plan.md`；计划完成后必须更新这个文件，写清已完成事项、实际落地路径，以及实现与计划不一致时的最终决策。
 9. 已废弃接口、旧 endpoint map、旧路径、旧数据库字段说明应删除，不长期保留历史流水账。
 
 ## 交付检查清单
@@ -55,5 +55,5 @@
 - [ ] API 变更已同步对应前端的端侧 API 文档
 - [ ] schema 变更已同步数据库设计与 CRUD 文档
 - [ ] 架构口径变更已同步对应规范文档
-- [ ] 迁移状态已更新到 `changes/migration/current-plan.md`
+- [ ] 迁移状态已更新到 `changes/go_backend/current-plan.md`
 - [ ] 旧路径引用已清理

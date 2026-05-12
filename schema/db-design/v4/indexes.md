@@ -11,6 +11,7 @@
 - `hs_hpd_listing`: `source_type_1_source_id_1`
 - `hs_hpd_miniapp_listing`: `listing_id_1`
 - `hs_usr_favorite`: `user_id_1_listing_id_1`
+- `hs_usr_history`: `user_id_1_listing_id_1`
 
 ## 2. 检索核心
 - `hs_hpd_miniapp_listing`:
@@ -19,6 +20,10 @@
   - `is_online_1_weight_score_-1_updated_at_-1`
 - `hs_hpd_listing`:
   - `listing_status_1_updated_at_-1`
+- `hs_usr_favorite`:
+  - `user_id_1_status_1_updated_at_-1`
+- `hs_usr_history`:
+  - `user_id_1_viewed_at_-1`
 
 ## 3. 流程核心
 - `hs_hac_audit_task`: `audit_status_1_submitted_at_-1`

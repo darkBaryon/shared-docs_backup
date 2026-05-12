@@ -15,7 +15,7 @@
 - 数据库变更至少同步：
   - `schema/db-design/`
   - `schema/backend-crud/`
-- 架构口径变更应更新对应规范文档和 `changes/migration/current-plan.md`。
+- 架构口径变更应更新对应规范文档和 `changes/go_backend/current-plan.md`。
 
 ## 文件命名
 
