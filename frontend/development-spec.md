@@ -36,6 +36,7 @@
 ```text
 src/
   api/
+  assets/
   components/
   config/
   models/
@@ -50,7 +51,8 @@ src/
 目录职责：
 
 - `api/`：接口定义层。维护 URL、请求方法、请求参数类型、响应类型和调用函数。
-- `components/`：跨页面复用组件。
+- `assets/css/`：页面和组件样式资源。
+- `components/`：前端组件目录，按业务模块分子目录。
 - `config/`：环境配置、公共配置。
 - `models/`：后端 DTO 到前端 ViewModel 的转换，例如房源卡片、详情视图模型。
 - `pages/`：路由页面入口，只放页面壳和页面级流程。
@@ -209,11 +211,10 @@ Page 层不做：
 位置：
 
 ```text
-src/components/
-src/features/{feature}/components/
+src/components/{module}/
 ```
 
-页面私有组件也可以放在 `features/{feature}/components/`，由页面引用。
+页面私有组件和公共组件统一放在 `components/` 下，按业务模块分目录。不要使用 `features` 作为目录名。
 
 职责：
 
@@ -256,7 +257,6 @@ Utils 层禁止依赖：
 
 - `pages/`
 - `components/`
-- `features/`
 
 ### 5.6 Services 使用规则
 
@@ -348,8 +348,8 @@ API 函数命名：
 
 - 统一使用 `SCSS`
 - 页面样式和组件样式不放在 `pages/` 目录长期堆积。
-- 公共样式放入 `src/styles/`。
-- 页面或 feature 样式放入 `src/styles/pages/`、`src/styles/components/` 或 `src/features/{feature}/styles/`。
+- 页面和组件样式统一放入 `src/assets/css/{module}/`。
+- 跨页面公共样式放入 `src/styles/`。
 - 小程序与 H5 均需保证可用
 - 小程序页面尺寸优先使用 `rpx`
 

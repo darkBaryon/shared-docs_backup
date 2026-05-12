@@ -252,8 +252,8 @@ pages/*
 
 ```text
 pages/*
-features/{feature}/components
-features/{feature}/styles
+components/{module}
+assets/css/{module}
 api/{module}.ts      // URL + method + request type + response type + 调用函数
 models/{model}.ts    // DTO -> ViewModel
 utils/*
@@ -264,7 +264,7 @@ utils/*
 1. `api/*` 从 URL 常量升级为完整 API 函数。
 2. `services/house/adapters.ts`、`services/favorite/mapper.ts`、`services/history/mapper.ts` 合并为统一 `models/listing.ts`。
 3. `discover` 搜索面板 UI 状态回收到组件内，页面只接收 `search` 事件和查询参数。
-4. 页面私有组件和样式从 `pages/*` 逐步迁到 `features/*` 或 `styles/*`。
+4. 页面组件从 `pages/*` 迁到 `components/{module}`，样式迁到 `assets/css/{module}`。
 5. `utils` 不再依赖 `pages` 常量，storage key 移到 `utils/storageKeys.ts` 或 `constants`。
 
 迁移原则：
@@ -394,7 +394,7 @@ src/pages/ai
 3. `api/favorite.ts`、`api/history.ts`：补 API 函数和 request/response 类型。
 4. `favorite/history` 页面改为复用 `models/listing.ts`。
 5. `discover` 搜索面板状态回收到组件内。
-6. `features/discover`：迁移 discover 私有组件、常量、样式。
+6. `components/discover`：迁移 discover 私有组件和常量，样式放入 `assets/css/discover`。
 7. `utils/storageKeys.ts`：统一 token/profile/favorite/history cache key。
 
 ## 5. 验收标准

@@ -41,24 +41,26 @@ src/
     profile/
       profile.vue
 
-  features/
+  components/
     discover/
-      components/
-        DiscoverSearchPanel.vue
-        DiscoverHouseList.vue
-      styles/
-        discover.scss
-        DiscoverSearchPanel.scss
+      DiscoverSearchPanel.vue
+      DiscoverHouseList.vue
       constants.ts
 
     house-detail/
-      components/
-      styles/
+      HouseDetailGallery.vue
+      HouseDetailInfo.vue
+
+  assets/
+    css/
+      discover/
+        discover.scss
+        DiscoverSearchPanel.scss
+      house-detail/
+        house-detail.scss
 
   styles/
     app.scss
-    pages/
-    components/
 
   utils/
     http.ts
@@ -71,9 +73,9 @@ src/
 说明：
 
 - `pages/` 只表达小程序路由入口。
-- 页面私有 UI 组件、组件样式、页面私有常量放入 `features/{feature}/`。
-- 跨页面复用组件再放 `src/components/`。
-- API 定义不放到 `features/` 或 `pages/`，统一在 `src/api/`。
+- 页面组件统一放入 `src/components/{module}/`，按业务模块分目录。
+- 页面样式和组件样式统一放入 `src/assets/css/{module}/`。
+- API 定义不放到 `components/` 或 `pages/`，统一在 `src/api/`。
 
 ## 3. API 层
 
@@ -224,16 +226,15 @@ async function onSearch(params: SearchHouseRequest) {
 推荐：
 
 ```text
-src/features/discover/styles/
-src/features/house-detail/styles/
-src/styles/pages/
-src/styles/components/
+src/assets/css/discover/
+src/assets/css/house-detail/
+src/assets/css/login/
 ```
 
 规则：
 
 - 页面路由文件旁边不继续堆大量 `.scss`。
-- 组件样式跟随 feature 放入 `styles/`。
+- 页面和组件样式统一放入 `src/assets/css/{module}/`。
 - 跨页面公共样式放 `src/styles/`。
 - 迁移时允许小步移动，不要求一次性全量改目录。
 
@@ -246,6 +247,6 @@ src/styles/components/
 3. `discover`：搜索面板状态回收到组件，页面只处理 API 调用和结果渲染。
 4. `favorite/history`：复用 `models/listing.ts`。
 5. `api/user.ts`、`api/favorite.ts`、`api/history.ts`：逐步补齐 request/response type 和调用函数。
-6. 样式从 `pages/*` 迁到 `features/*/styles` 或 `styles/pages`。
+6. 样式从 `pages/*` 迁到 `assets/css/{module}`。
 
 `chat/send` 当前按既有旧接口保留，不纳入 HPD miniapp API 迁移。
