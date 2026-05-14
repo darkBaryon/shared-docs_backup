@@ -349,8 +349,8 @@ interface PublishListResp<T> {
 
 | 字段 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
-| `city` | string | 是 | 城市 |
-| `district` | string | 否 | 区域；不传表示列出城市下全部项目 |
+| `city` | string | 否 | 城市；不传表示不按城市筛选 |
+| `district` | string | 否 | 区域；不传表示不按区域筛选 |
 
 响应：`ApiResponse<PublishListResp<CentralizedProjectListItem>>`
 

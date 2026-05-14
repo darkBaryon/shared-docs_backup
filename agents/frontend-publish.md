@@ -3,7 +3,7 @@
 ## 必读
 
 1. [global.md](./global.md)
-2. [../changes/publish_web/current-plan.md](../changes/publish_web/current-plan.md)
+2. [../workstreams/publish-web/status.md](../workstreams/publish-web/status.md)
 3. [../frontend/publish.md](../frontend/publish.md)
 4. [../product/publish.md](../product/publish.md)
 5. [../api/publish.md](../api/publish.md)

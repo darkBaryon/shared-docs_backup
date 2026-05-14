@@ -366,4 +366,4 @@ API 函数命名：
 - 前端实现规范以本文件为准，接口真值来源为：
   - `shared-docs/api/`
   - `shared-docs/schema/`
-  - `shared-docs/changes/`
+  - `shared-docs/workstreams/`

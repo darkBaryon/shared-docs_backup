@@ -2,7 +2,7 @@
 
 发房系统前端以 [../api/publish.md](../api/publish.md) 为接口依据。
 
-当前开发计划见 [../changes/publish_web/current-plan.md](../changes/publish_web/current-plan.md)。
+当前开发计划见 [../workstreams/publish-web/status.md](../workstreams/publish-web/status.md)。
 
 ## 当前后端状态
 
@@ -89,6 +89,6 @@ Authorization: Bearer <token>
 
 ## 文档维护
 
-- 当前状态和下一步维护在 [../changes/publish_web/current-plan.md](../changes/publish_web/current-plan.md)。
+- 当前状态和下一步维护在 [../workstreams/publish-web/status.md](../workstreams/publish-web/status.md)。
 - 接口路径、请求字段、响应字段维护在 [../api/publish.md](../api/publish.md)。
 - 字段、枚举、索引维护在 [../schema/db-design/v4/modules/house-master-data.md](../schema/db-design/v4/modules/house-master-data.md)。
