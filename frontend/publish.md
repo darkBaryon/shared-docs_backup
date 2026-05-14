@@ -80,12 +80,44 @@ publish 路由当前需要：
 Authorization: Bearer <token>
 ```
 
-小程序 auth 不作为 publish/admin 的通用登录入口。正式 publish auth 契约确认前，出房 Web 端只需要：
+小程序 auth 不作为 publish/admin 的通用登录入口。正式出房 Web 流程使用 publish auth：
 
-- 请求层支持 Bearer Token。
-- Token 从本地存储读取。
-- 开发联调时允许提供临时 Token 设置入口。
+```text
+POST /api/v1/publish_auth/login
+POST /api/v1/publish_auth/session
+POST /api/v1/publish_auth/logout
+```
+
+前端约束：
+
+- 登录页或登录面板调用 `publish_auth/login` 获取 token。
+- App 初始化时调用 `publish_auth/session` 恢复登录态。
+- 请求层只设置 `Authorization: Bearer <token>`，不解析 token。
+- 401 或业务码 `10002` 时清理本地 token 并回到未登录态。
 - 不复用小程序微信登录。
+- 开发 token 面板只允许在 `VITE_ENABLE_DEV_TOKEN_PANEL=true` 时出现；未开启时不能渲染入口，也不能作为正式登录流程。
+
+## 数据作用域
+
+出房 Web 不在前端决定账号数据范围。前端只提交 city/district/name 等业务筛选字段，后端从 publish session principal 执行数据作用域校验。
+
+禁止在业务请求中提交：
+
+```text
+user_id
+staff_id
+owner
+owner_id
+owner_phone
+maintainer_staff_id
+service_staff_id
+```
+
+约束：
+
+- HMD 不加 owner；前端 model、form、query 不新增 HMD owner 字段。
+- 项目/小区列表在 session 有效后自动加载；搜索条件只能缩小当前账号已授权范围，不能扩大权限。
+- 楼栋、房型、房间列表以接口返回为准，不做本地权限推断。
 
 ## 文档维护
 

@@ -89,6 +89,32 @@ internal/domain/hpd/
 - service 层返回 `errcode.InvalidParam / NotFound / AlreadyExists / DatabaseError` 等明确语义。
 - handler 只调用 `response.Err(c, err)`，不通过字符串判断错误类型。
 
+### 数据作用域
+
+PublishService 必须接收或从 context 读取结构化 session principal，并在应用服务层执行数据作用域校验。handler 只负责把 HTTP 输入转成 service input，不在 handler 内拼权限条件；前端也不能通过请求字段决定权限。
+
+principal 结构以 [auth.md](./auth.md) 为准，关键字段为：
+
+```text
+principal_type: user | staff
+principal_id: ObjectID hex
+terminal: miniapp | publish | admin
+phone: string
+role_codes: string[]
+permission_codes: string[]
+```
+
+publish 入口约束：
+
+- 所有 publish 业务路由必须使用 `terminal=publish` 的 session principal。
+- 全局权限由 `role_codes` 包含 `super_admin` 或 `permission_codes` 包含 `house.manage` 表达。
+- 非全局 staff 只能访问 `hs_hpd_entrust_relation` 中 `maintainer_staff_id` 或 `service_staff_id` 等于当前 `principal_id` 且 `relation_status=1` 的房源。
+- user 类型 principal 只能访问 `owner_phone` 等于当前 `phone` 且 `relation_status=1` 的房源。
+- HMD 不增加 owner/user/staff 字段；数据作用域从 HPD listing 与 entrust relation 起算，再聚合回 HMD 项目、小区、楼栋、房型、房间。
+- 列表接口先套数据作用域，再应用 city/district/name 等业务筛选。
+- 详情、更新、房态等接口必须先证明当前 principal 可访问目标资源；无权访问时返回权限/不存在语义，不能依赖前端隐藏入口。
+- 前端请求中的 `user_id`、`staff_id`、owner、`owner_phone`、`maintainer_staff_id`、`service_staff_id` 等身份过滤字段一律不作为 publish 权限条件。
+
 ## HMD Mutation Result
 
 HMD 写操作不再只返回实体，而是返回：

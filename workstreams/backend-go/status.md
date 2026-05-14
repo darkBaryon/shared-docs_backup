@@ -37,7 +37,7 @@ handler/v1/{terminal}/{module}
 
 ## 当前任务
 
-- [Publish Auth 与数据作用域计划](./active/publish-auth-data-scope.md)
+- [Publish Auth 与数据作用域计划](./active/publish-auth-data-scope.md)：阶段 0 契约确认已更新，待 review；不要进入阶段 1。
 - [管理端 API 实施计划](./active/admin-api.md)
 - [小程序后续模块计划](./active/miniapp-followups.md)
 

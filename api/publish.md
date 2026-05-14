@@ -58,13 +58,28 @@ listingFacilities
 
 ### 2.3 鉴权
 
-除后续明确公开的登录/注册接口外，publish 路由默认需要：
+除 `publish_auth/login` 外，publish 路由默认需要：
 
 ```text
 Authorization: Bearer <token>
 ```
 
 token 是后端签发的 opaque Redis session token。前端只原样放入 header，不解析 token 内容。
+
+正式出房 Web 登录态使用 publish 专用 auth：
+
+```text
+POST /api/v1/publish_auth/login
+POST /api/v1/publish_auth/session
+POST /api/v1/publish_auth/logout
+```
+
+约束：
+
+- `publish_auth` 只服务出房 Web，不复用小程序微信 auth。
+- token 只是不透明 Redis session token，不是 JWT，不包含可供前端解析的权限信息。
+- session 中的服务端 principal 是后端数据作用域判断依据；前端业务请求不得提交 `user_id`、`staff_id` 或 owner 过滤字段。
+- HMD 不增加 owner/user/staff 归属字段；房源归属和服务关系通过 HPD entrust relation 表达。
 
 ### 2.4 响应包裹
 
@@ -107,7 +122,128 @@ token 是后端签发的 opaque Redis session token。前端只原样放入 head
 | `10006` | 资源已存在 | 项目编码、楼栋编码、房号、房型名重复 |
 | `50002` | 数据库错误 | Mongo 读写失败 |
 
-### 2.5 列表与分页
+### 2.5 Publish Auth
+
+#### `PublishPrincipal`
+
+`PublishPrincipal` 是 session principal 对外只读摘要。字段使用 `snake_case`。
+
+| 字段 | 类型 | 必填 | 说明 |
+| --- | --- | --- | --- |
+| `principal_type` | string | 是 | `staff` 或 `user`；publish Web MVP 优先使用 `staff` |
+| `principal_id` | string | 是 | 当前身份 ObjectID hex |
+| `terminal` | string | 是 | 固定为 `publish` |
+| `phone` | string | 是 | 当前身份手机号 |
+| `role_codes` | array<string> | 是 | 当前身份角色编码 |
+| `permission_codes` | array<string> | 是 | 当前身份权限编码 |
+
+#### `PublishAuthSubject`
+
+| 字段 | 类型 | 必填 | 说明 |
+| --- | --- | --- | --- |
+| `id` | string | 是 | 当前 staff/user ID |
+| `name` | string | 否 | 当前 staff/user 展示名 |
+| `phone` | string | 是 | 当前 staff/user 手机号 |
+
+#### `POST /api/v1/publish_auth/login`
+
+鉴权：公开。
+
+用途：出房 Web 登录并签发 Redis session token。
+
+请求：
+
+| 字段 | 类型 | 必填 | 说明 |
+| --- | --- | --- | --- |
+| `phone` | string | 是 | 员工手机号；MVP/local 联调用 |
+
+约束：
+
+- local 环境 MVP 可以只按员工手机号登录。
+- 非 local 环境不得上线纯手机号登录；验证码或外部认证字段上线前必须先更新本文档契约。
+- 不提交 `terminal`，该接口固定生成 `terminal=publish` 的 principal。
+- 不提交 `user_id`、`staff_id`、owner 过滤字段。
+
+响应：
+
+```ts
+interface PublishAuthLoginResp {
+  token: string
+  principal: PublishPrincipal
+  subject: PublishAuthSubject
+}
+```
+
+返回：`ApiResponse<PublishAuthLoginResp>`
+
+#### `POST /api/v1/publish_auth/session`
+
+鉴权：需要 Bearer token。
+
+用途：校验当前 token 并返回出房 Web 登录态。
+
+请求：空对象 `{}`。
+
+响应：
+
+```ts
+interface PublishAuthSessionResp {
+  principal: PublishPrincipal
+  subject: PublishAuthSubject
+}
+```
+
+返回：`ApiResponse<PublishAuthSessionResp>`
+
+约束：
+
+- 只有 `terminal=publish` 的 session 可用于出房 Web。
+- 前端只使用返回的 principal/subject 做展示和流程控制，不用它绕过后端权限判断。
+
+#### `POST /api/v1/publish_auth/logout`
+
+鉴权：需要 Bearer token。
+
+用途：注销当前 Redis session token。
+
+请求：空对象 `{}`。
+
+响应：
+
+```ts
+interface PublishAuthLogoutResp {
+  logged_out: boolean
+}
+```
+
+返回：`ApiResponse<PublishAuthLogoutResp>`
+
+### 2.6 数据作用域请求约束
+
+所有 HMD 业务请求的数据作用域由后端从 session principal 推导，前端只提交业务筛选条件。
+
+允许：
+
+```text
+city
+district
+project_name
+community_name
+```
+
+禁止：
+
+```text
+user_id
+staff_id
+owner
+owner_id
+owner_phone
+maintainer_staff_id
+service_staff_id
+```
+
+### 2.7 列表与分页
 
 第一期 `list_*` 接口不分页。
 
@@ -130,7 +266,7 @@ token 是后端签发的 opaque Redis session token。前端只原样放入 head
 - 列表 item 当前使用对应业务对象的轻量 DTO；第一期轻量 DTO 与完整 entity 字段保持一致，方便列表页和选择器复用。
 - 所有 `list_*` 默认排序统一为 `updated_at desc, id desc`，保证列表展示和前端测试稳定。
 
-### 2.6 创建、更新和详情返回
+### 2.8 创建、更新和详情返回
 
 - `create_*` 成功返回创建后的完整 entity。
 - `update_*` 成功返回更新后的完整 entity。
@@ -138,7 +274,7 @@ token 是后端签发的 opaque Redis session token。前端只原样放入 head
 - `update_*_status` 成功返回更新后的完整 room entity。
 - `update_*` 是表单全量保存，不是局部 patch；未提交的可选字段按空字符串、空数组、`0` 或 `null` 处理。
 
-### 2.7 图片字段
+### 2.9 图片字段
 
 楼栋：
 
@@ -162,7 +298,7 @@ images: Array<{
 - `tag` 使用 HMD schema 中 `image_tags` 枚举。
 - 表单提交枚举值，不提交中文文案。
 
-### 2.8 唯一性规则
+### 2.10 唯一性规则
 
 | 对象 | 字段 | 唯一范围 | 说明 |
 | --- | --- | --- | --- |
