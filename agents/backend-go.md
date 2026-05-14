@@ -7,7 +7,7 @@
 3. [../backend/index.md](../backend/index.md)
 4. [../api/index.md](../api/index.md)
 5. [../schema/index.md](../schema/index.md)
-6. [../changes/go_backend/current-plan.md](../changes/go_backend/current-plan.md)
+6. [../workstreams/backend-go/status.md](../workstreams/backend-go/status.md)
 
 ## 工程边界
 
@@ -22,7 +22,8 @@
 - 当前后端按 `handler/v1/{terminal}/{module} -> service/{terminal}/{module} -> domain/repository` 组织。
 - 小程序 auth、house 读接口已接入。
 - publish 第一阶段 HMD 链路和 HPD 小程序 projector 已接入。
-- 下一步优先实现小程序 favorite/history/user。
+- 小程序 favorite/history/user 已接入。
+- 当前任务见 [../workstreams/backend-go/status.md](../workstreams/backend-go/status.md)。
 
 ## 修改规则
 

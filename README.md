@@ -8,20 +8,22 @@
 - Go 后端代码应该按什么边界实现
 - 接下来该做什么
 
-## 先看这 7 个文件
+## 先看这些文件
 
 大多数任务先读这几个就够了：
 
-1. [changes/go_backend/current-plan.md](./changes/go_backend/current-plan.md)：Go 后端迁移状态、已完成事项、下一步。
-2. [api/miniapp-api.md](./api/miniapp-api.md)：小程序接口契约。
-3. [api/publish.md](./api/publish.md)：发房端接口契约。
-4. [backend/architecture.md](./backend/architecture.md)：Go 后端分层和代码边界。
-5. [schema/db-design/v4/index.md](./schema/db-design/v4/index.md)：数据库设计入口。
-6. [frontend/development-spec.md](./frontend/development-spec.md)：前端目标架构、分层和目录规范。
-7. [changes/publish_web/current-plan.md](./changes/publish_web/current-plan.md)：出房 Web 端当前计划和下一步。
+1. [workstreams/index.md](./workstreams/index.md)：各端当前推进入口。
+2. [workstreams/backend-go/status.md](./workstreams/backend-go/status.md)：Go 后端当前状态和下一步。
+3. [workstreams/publish-web/status.md](./workstreams/publish-web/status.md)：出房 Web 当前状态和下一步。
+4. [workstreams/miniapp/status.md](./workstreams/miniapp/status.md)：小程序前端当前状态和下一步。
+5. [api/miniapp-api.md](./api/miniapp-api.md)：小程序接口契约。
+6. [api/publish.md](./api/publish.md)：发房端接口契约。
+7. [backend/architecture.md](./backend/architecture.md)：Go 后端分层和代码边界。
+8. [schema/db-design/v4/index.md](./schema/db-design/v4/index.md)：数据库设计入口。
+9. [frontend/development-spec.md](./frontend/development-spec.md)：前端目标架构、分层和目录规范。
 
-小程序前端 HPD 和架构迁移计划见 [changes/miniapp/current-plan.md](./changes/miniapp/current-plan.md)。
-出房 Web 端计划见 [changes/publish_web/current-plan.md](./changes/publish_web/current-plan.md)。
+具体任务计划不要塞进 `status.md`，应放在对应端的 `workstreams/{app}/active/`。
+Review report 放在对应端的 `workstreams/{app}/reviews/`。
 
 ## 当前后端形态
 
@@ -63,11 +65,12 @@ handler/v1/publish
 - 小程序找房：
   - `POST /api/v1/house/search`
   - `POST /api/v1/house/public_detail`
+- 小程序用户资料、收藏、足迹：见 [api/miniapp-api.md](./api/miniapp-api.md)。
 - 发房端第一阶段 HMD 接口：见 [api/publish.md](./api/publish.md)。
 
 待接入：
 
-- 小程序用户资料、收藏、足迹：见 [api/miniapp-api.md](./api/miniapp-api.md)。
+- 小程序看房计划、通知中心：见 [workstreams/backend-go/active/miniapp-followups.md](./workstreams/backend-go/active/miniapp-followups.md)。
 - 管理端 API：尚未开始，后续单独设计。
 
 ## 目录怎么用
@@ -76,9 +79,7 @@ handler/v1/publish
 - [schema/](./schema/index.md)：数据库字段、枚举、索引。
 - [backend/](./backend/index.md)：Go 后端实现边界。
 - [flows/](./flows/index.md)：跨模块链路，例如发房到 HPD、小程序找房。
-- [changes/go_backend/](./changes/go_backend/current-plan.md)：Go 后端迁移状态和下一步计划。
-- [changes/miniapp/](./changes/miniapp/current-plan.md)：小程序前端 HPD 和架构迁移计划。
-- [changes/publish_web/](./changes/publish_web/current-plan.md)：出房 Web 端当前计划和下一步。
+- [workstreams/](./workstreams/index.md)：各端当前推进状态、任务计划和 review report。
 - [agents/](./agents/index.md)：不同 Agent 接手任务前的工作规则。
 - [product/](./product/index.md)、[frontend/](./frontend/index.md)、[overview/](./overview/index.md)：产品和前端背景，需要时再读。
 
@@ -86,5 +87,5 @@ handler/v1/publish
 
 - 不维护统一大而全的 OpenAPI 文件。
 - 不维护历史 endpoint map。
-- 已废弃接口、旧字段、旧路径说明应删除，不长期堆在 changes 里。
-- 如果文档之间冲突，以 `api/`、`schema/`、`changes/go_backend/current-plan.md`、`changes/miniapp/current-plan.md` 为准。
+- 已废弃接口、旧字段、旧路径说明应删除，不长期堆在 workstreams 里。
+- 如果文档之间冲突，以 `api/`、`schema/`、`backend/`、`frontend/` 等规范类文档为准；`workstreams/` 只记录当前推进状态和入口。

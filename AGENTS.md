@@ -25,7 +25,7 @@
 - `backend/`：Go 后端工程约定。
 - `frontend/`：前端工程约定和端侧协作说明。
 - `flows/`：跨模块业务流程。
-- `changes/`：当前迁移状态和下一步计划。
+- `workstreams/`：各端当前推进状态、任务计划和 review report。
 
 ## 契约优先级
 
@@ -33,7 +33,7 @@
 2. 接口通用命名规则：以 `overview/project-spec.md` 为准。
 3. 数据库结构、枚举、索引、后端 CRUD：以 `schema/` 为准。
 4. 工程边界和实现约定：以 `backend/`、`frontend/`、`agents/` 为准。
-5. 历史调整说明与同步记录：以 `changes/` 为准。
+5. 当前推进状态和 review report：以 `workstreams/` 为准。
 
 ## 编辑规则
 
@@ -44,10 +44,12 @@
 5. 数据库变更必须同时更新：
    - `schema/db-design/`
    - `schema/backend-crud/`
-6. 若当前实现或最终策略与历史输入存在差异，直接更新对应规范文档和 `changes/go_backend/current-plan.md`。
+6. 若当前实现或最终策略与历史输入存在差异，直接更新对应规范文档和相关 `workstreams/{app}/status.md`。
 7. 链接使用相对路径。
-8. 所有迁移状态和计划统一维护在 `changes/go_backend/current-plan.md`；计划完成后必须更新这个文件，写清已完成事项、实际落地路径，以及实现与计划不一致时的最终决策。
-9. 已废弃接口、旧 endpoint map、旧路径、旧数据库字段说明应删除，不长期保留历史流水账。
+8. `workstreams/{app}/status.md` 只写短状态和入口；具体任务计划放入 `workstreams/{app}/active/{topic}.md`。
+9. review report 放入 `workstreams/{app}/reviews/YYYY-MM-DD-topic.md`。
+10. 不设置 `decisions/`。已经确认的技术、产品、接口或数据口径，应直接沉淀到对应规范文档。
+11. 已废弃接口、旧 endpoint map、旧路径、旧数据库字段说明应删除，不长期保留历史流水账。
 
 ## 交付检查清单
 
@@ -55,5 +57,6 @@
 - [ ] API 变更已同步对应前端的端侧 API 文档
 - [ ] schema 变更已同步数据库设计与 CRUD 文档
 - [ ] 架构口径变更已同步对应规范文档
-- [ ] 迁移状态已更新到 `changes/go_backend/current-plan.md`
+- [ ] 当前推进状态已更新到相关 `workstreams/{app}/status.md`
+- [ ] 具体任务计划或 review report 已放到对应 `active/` 或 `reviews/`
 - [ ] 旧路径引用已清理
