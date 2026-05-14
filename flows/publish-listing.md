@@ -4,8 +4,8 @@
 
 ```text
 发房系统前端
-  -> POST /api/v1/publish/{action}
-    -> PublishHandler
+  -> POST /api/v1/{business_module}/{action}
+    -> PublishHandler 业务对象路由
       -> PublishService
         -> domain/hmd.Service 写 HMD
           -> repository/hmd

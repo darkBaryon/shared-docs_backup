@@ -136,22 +136,22 @@ go test ./internal/domain/hmd -run Integration -count=1 -v
 真实服务联调已覆盖：
 
 - `auth/session` 鉴权中间件
-- `create_centralized_project`
-- `centralized_project_detail`
-- `list_centralized_projects`
-- `create_building`
-- `update_building`
-- `list_buildings_by_project`
-- `create_room_type`
-- `list_room_types_by_building`
-- `create_centralized_room`
-- `update_centralized_room_status`
-- `list_centralized_rooms_by_building`
-- `create_decentralized_community`
-- `list_decentralized_communities`
-- `create_decentralized_room`
-- `update_decentralized_room_status`
-- `list_decentralized_rooms_by_community`
+- `POST /api/v1/centralized_project/create`
+- `POST /api/v1/centralized_project/detail`
+- `POST /api/v1/centralized_project/list`
+- `POST /api/v1/building/create`
+- `POST /api/v1/building/update`
+- `POST /api/v1/building/list_by_project`
+- `POST /api/v1/room_type/create`
+- `POST /api/v1/room_type/list_by_building`
+- `POST /api/v1/centralized_room/create`
+- `POST /api/v1/centralized_room/update_status`
+- `POST /api/v1/centralized_room/list_by_building`
+- `POST /api/v1/decentralized_community/create`
+- `POST /api/v1/decentralized_community/list`
+- `POST /api/v1/decentralized_room/create`
+- `POST /api/v1/decentralized_room/update_status`
+- `POST /api/v1/decentralized_room/list_by_community`
 
 联调确认：
 

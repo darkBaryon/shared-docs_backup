@@ -3,7 +3,7 @@
 ## 1. 适用范围
 
 - 本文档是出房 Web 端第一期 API 契约源。
-- 发房系统模块统一使用 `publish` 作为 API 模块名。
+- 发房系统 API 不使用端侧名 `publish` 作为模块名；URL module 位统一使用业务对象名。
 - 当前第一期只覆盖 HMD 录入与维护：集中式项目、楼栋、房型、集中式房间、分散式小区、分散式房间。
 - 本文档定义的是对前端稳定暴露的 DTO，不直接等同 Go model、Mongo schema 或旧 Python 字段。
 
@@ -20,8 +20,10 @@ POST /api/v1/{business_module}/{action}
 约定：
 
 - 所有业务接口统一使用 `POST`。
+- `{business_module}` 使用业务对象名，例如 `centralized_project`、`building`、`room_type`、`centralized_room`、`decentralized_community`、`decentralized_room`。
 - `{action}` 使用 snake_case，且必须是单个 path segment。
-- `{action}` 必须明确对象与动作，避免只使用 `create`、`update`、`detail` 这类无对象前缀的名字。
+- 当 `{business_module}` 已明确业务对象时，`{action}` 可以使用 `create`、`update`、`detail`；涉及过滤或状态流转时使用更具体动作，例如 `list_by_project`、`update_status`。
+- 不注册、不调用 `/api/v1/publish/{action}` 兼容路径。
 - 页面路由可以多级组织，但后端 API 不使用 RESTful path。
 
 ### 2.2 字段命名
@@ -859,9 +861,9 @@ POST /api/v1/{business_module}/{action}
 
 例如未来可新增：
 
-- `create_listing`
-- `update_listing_publish_content`
-- `submit_listing_for_audit`
-- `offline_listing`
+- `POST /api/v1/listing/create`
+- `POST /api/v1/listing/update_publish_content`
+- `POST /api/v1/listing/submit_for_audit`
+- `POST /api/v1/listing/offline`
 
 具体接口必须先更新本文档，再进入前端 DTO 和页面实现。

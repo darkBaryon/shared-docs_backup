@@ -114,7 +114,7 @@ POST /api/v{version}/{模块}/{动作}
 
 - 所有业务接口统一使用 `POST`。
 - 禁止把主业务接口设计成 RESTful 风格的 `GET/PUT/DELETE`。
-- `{模块}` 是业务模块名，例如 `auth`、`user`、`house`、`publish`。
+- `{模块}` 是业务模块名，例如 `auth`、`user`、`house`。发房系统按业务对象拆 module，例如 `centralized_project`、`building`、`room_type`、`centralized_room`、`decentralized_community`、`decentralized_room`。
 - `{动作}` 必须是单个 path segment，可以用 snake_case 表达具体动作。
 - 禁止在 `{动作}` 后继续追加业务层级。
 
@@ -123,14 +123,15 @@ POST /api/v{version}/{模块}/{动作}
 ```text
 POST /api/v1/house/search
 POST /api/v1/house/public_detail
-POST /api/v1/publish/create_centralized_project
-POST /api/v1/publish/update_decentralized_room_status
+POST /api/v1/centralized_project/create
+POST /api/v1/decentralized_room/update_status
 ```
 
 错误：
 
 ```text
 POST /api/v1/miniapp/listing/search
+POST /api/v1/publish/create_centralized_project
 POST /api/v1/publish/hmd/{domain}/{action}
 ```
 
@@ -138,7 +139,7 @@ POST /api/v1/publish/hmd/{domain}/{action}
 
 - 小程序是前端端类型，不天然等于 API 模块。
 - 小程序找房接口当前归属 `house` 模块。
-- 发房系统接口归属 `publish` 模块。
+- 发房系统是端侧/业务域名称，API module 位使用具体业务对象，不使用 `publish`。
 
 ### 4.3 响应格式
 
