@@ -1,6 +1,6 @@
 # Publish Auth 与数据作用域计划
 
-状态：阶段 1 后端 publish auth 已实现并 review 通过，待阶段 2 前端登录态接入。
+状态：阶段 2 前端登录态接入已实现并 review 通过，待阶段 3 后端 HPD entrust relation。
 
 ## 背景
 
