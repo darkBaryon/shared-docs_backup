@@ -21,12 +21,12 @@ session value 必须保存结构化 principal JSON，而不是只保存字符串
 
 ```json
 {
-  "principal_type": "staff",
+  "principal_type": "user",
   "principal_id": "ObjectID hex",
   "terminal": "publish",
   "phone": "13800000000",
-  "role_codes": ["super_admin"],
-  "permission_codes": ["house.manage"]
+  "role_codes": [],
+  "permission_codes": []
 }
 ```
 
@@ -44,7 +44,7 @@ session value 必须保存结构化 principal JSON，而不是只保存字符串
 ## 终端边界
 
 - `miniapp`：小程序登录入口，只产生 `terminal=miniapp` 的 session；默认 `principal_type=user`。
-- `publish`：出房 Web 登录入口使用 `POST /api/v1/publish_auth/login`、`session`、`logout`；MVP 优先产生 `terminal=publish`、`principal_type=staff` 的 session。
+- `publish`：房东出房 Web 登录入口使用 `POST /api/v1/publish_auth/login`、`session`、`logout`；固定产生 `terminal=publish`、`principal_type=user` 的 session，登录主档来自 `hs_usr_user.phone`。
 - `admin`：后台管理登录入口独立设计，必须产生 `terminal=admin` 的 session。
 
 约束：
@@ -53,7 +53,7 @@ session value 必须保存结构化 principal JSON，而不是只保存字符串
 - publish 业务 middleware 必须校验 `terminal=publish`，不能只校验 token 是否存在。
 - miniapp、publish、admin 可以复用同一个 Redis session store，但必须通过 principal 的 `terminal` 和 `principal_type` 区分边界。
 - 前端业务请求不得提交 `user_id`、`staff_id` 或 owner 过滤字段；后端从 principal 推导数据作用域。
-- HMD 不增加 owner/user/staff 归属字段；房源归属和服务关系属于 HPD entrust relation。
+- HMD 不增加 owner/user/staff 归属字段；publish 房东归属由 HPD root owner scope relation 表达。
 
 ## 相关文档
 

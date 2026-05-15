@@ -90,7 +90,7 @@ POST /api/v1/publish_auth/logout
 
 前端约束：
 
-- 登录页或登录面板调用 `publish_auth/login` 获取 token。
+- 登录页或登录面板以“房东手机号登录”为文案，调用 `publish_auth/login` 获取 token。
 - App 初始化时调用 `publish_auth/session` 恢复登录态。
 - 请求层只设置 `Authorization: Bearer <token>`，不解析 token。
 - 401 或业务码 `10002` 时清理本地 token 并回到未登录态。
@@ -116,6 +116,7 @@ service_staff_id
 约束：
 
 - HMD 不加 owner；前端 model、form、query 不新增 HMD owner 字段。
+- 当前登录主体固定解释为房东 user，不保留 staff 登录语义。
 - 项目/小区列表在 session 有效后自动加载；搜索条件只能缩小当前账号已授权范围，不能扩大权限。
 - 楼栋、房型、房间列表以接口返回为准，不做本地权限推断。
 

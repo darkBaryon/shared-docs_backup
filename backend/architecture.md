@@ -334,12 +334,7 @@ internal/model/{db-module}/
   - `user_auth`
   - `user_profile_ext`
 - `repository/publish_auth`
-  - `adm_staff`
-  - `adm_role`
-  - `adm_permission`
-  - `adm_staff_role`
-  - `adm_role_permission`
-  - `adm_login_log`
+  - `user`
 - `repository/favorite`
 - `repository/history`
 - `repository/hmd`

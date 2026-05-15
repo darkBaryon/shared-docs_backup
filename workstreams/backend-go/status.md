@@ -44,7 +44,7 @@ handler/v1/{terminal}/{module}
 
 ## 当前任务
 
-- [Publish Auth 与数据作用域计划](./active/publish-auth-data-scope.md)：阶段 2 前端登录态接入已实现并 review 通过，待阶段 3 后端 HPD entrust relation。
+- [Publish Auth 与数据作用域计划](./active/publish-auth-data-scope.md)：阶段 2 前端登录态接入已实现并 review 通过，待阶段 3 后端 root owner scope relation。
 - [管理端 API 实施计划](./active/admin-api.md)
 - [小程序后续模块计划](./active/miniapp-followups.md)
 

@@ -2,7 +2,7 @@
 
 日期：2026-05-15
 
-结论：不建议通过。Phase 4 的主线已经落在 service 层，`PublishScope`、HPD entrust relation 聚合、房间 detail/update/status 校验方向正确；但当前实现仍有几个会影响验收的数据作用域缺口，需要修正后再进入 Phase 5。
+结论：不建议通过。Phase 4 的主线已经落在 service 层，`PublishScope` 与房间 detail/update/status 校验方向正确；但当前实现仍有几个会影响验收的数据作用域缺口，需要修正后再进入 Phase 5。
 
 ## Findings
 
@@ -24,7 +24,7 @@
   - `internal/service/publish/centralized_room.go:21`
   - `internal/service/publish/decentralized_room.go:21`
 - 问题：
-  这些 create 方法只是 `newPublishScope`，随后直接写 HMD。非全局 staff 如果拿到别人的 `project_id` / `building_id` / `decentralized_id`，可以在对方项目、小区下创建楼栋、房型或房间。房间创建后还会登记自己的 entrust relation，进一步让这个 staff 通过聚合看到被注入的父级项目/小区。
+  这些 create 方法只是 `newPublishScope`，随后直接写 HMD。非全局 staff 如果拿到别人的 `project_id` / `building_id` / `decentralized_id`，可以在对方项目、小区下创建楼栋、房型或房间。
 - 建议：
   对有父资源的 create 加父级 scope 校验：创建楼栋/房型/房间前必须证明当前 principal 可访问对应项目、楼栋或小区；如果产品确认非全局只能创建房间，也应显式禁止非全局创建楼栋/房型。空项目/空小区创建需要单独明确规则，但不能让已有父资源被任意写入。
 
@@ -68,7 +68,7 @@
 ## Architecture Notes
 
 - `PublishScope` 放在 service 层是正确方向，handler 没有参与权限拼接，符合 Phase 4 的分层目标。
-- HPD entrust relation 没有回写 HMD，HMD model/repository 未发现新增 owner/staff 字段，符合 V4 约束。
+- HMD model/repository 未发现新增 owner/staff 字段，符合 V4 约束。
 - `scope_hmd.go` 当前通过 listing -> room -> project/community 做聚合，语义清楚，但实现是 N+1 查询。MVP 可接受；数据量上来后建议补批量读取或 repository 聚合方法，避免每次列表重复读取所有 accessible listings 和逐房间回查 HMD。
 
 ## Verification

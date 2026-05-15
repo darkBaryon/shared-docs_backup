@@ -78,8 +78,8 @@ POST /api/v1/publish_auth/logout
 
 - `publish_auth` 只服务出房 Web，不复用小程序微信 auth。
 - token 只是不透明 Redis session token，不是 JWT，不包含可供前端解析的权限信息。
-- session 中的服务端 principal 是后端数据作用域判断依据；前端业务请求不得提交 `user_id`、`staff_id` 或 owner 过滤字段。
-- HMD 不增加 owner/user/staff 归属字段；房源归属和服务关系通过 HPD entrust relation 表达。
+- session 中的服务端 principal 是后端数据作用域判断依据；前端业务请求不得提交 `user_id`、`staff_id`、`owner_phone` 或 owner 过滤字段。
+- HMD 不增加 owner/user/staff 归属字段；publish 房东归属通过 HPD root owner scope relation 表达。
 
 ### 2.4 响应包裹
 
@@ -131,20 +131,20 @@ POST /api/v1/publish_auth/logout
 
 | 字段 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
-| `principal_type` | string | 是 | `staff` 或 `user`；publish Web MVP 优先使用 `staff` |
+| `principal_type` | string | 是 | 固定为 `user` |
 | `principal_id` | string | 是 | 当前身份 ObjectID hex |
 | `terminal` | string | 是 | 固定为 `publish` |
 | `phone` | string | 是 | 当前身份手机号 |
-| `role_codes` | array<string> | 是 | 当前身份角色编码 |
-| `permission_codes` | array<string> | 是 | 当前身份权限编码 |
+| `role_codes` | array<string> | 是 | 当前为空数组 |
+| `permission_codes` | array<string> | 是 | 当前为空数组 |
 
 #### `PublishAuthSubject`
 
 | 字段 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
-| `id` | string | 是 | 当前 staff/user ID |
-| `name` | string | 否 | 当前 staff/user 展示名 |
-| `phone` | string | 是 | 当前 staff/user 手机号 |
+| `id` | string | 是 | 当前房东 user ID |
+| `name` | string | 否 | 当前房东展示名 |
+| `phone` | string | 是 | 当前房东手机号 |
 
 #### `POST /api/v1/publish_auth/login`
 
@@ -156,14 +156,15 @@ POST /api/v1/publish_auth/logout
 
 | 字段 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
-| `phone` | string | 是 | 员工手机号；MVP/local 联调用 |
+| `phone` | string | 是 | 房东手机号；当前 local 联调用 |
 
 约束：
 
-- local 环境 MVP 可以只按员工手机号登录。
+- local 环境当前按房东手机号直登。
 - 非 local 环境不得上线纯手机号登录；验证码或外部认证字段上线前必须先更新本文档契约。
 - 不提交 `terminal`，该接口固定生成 `terminal=publish` 的 principal。
 - 不提交 `user_id`、`staff_id`、owner 过滤字段。
+- 登录后 publish 数据作用域按当前房东 `user` 名下 `project/community` owner scope 判断，而不是由前端传 owner 字段或由员工权限放大。
 
 响应：
 
@@ -455,6 +456,15 @@ interface PublishListResp<T> {
 | `brand_name` | string | 否 | 品牌名称 |
 
 响应：`ApiResponse<CentralizedProject>`
+
+约束：
+
+- 成功语义包含三步同时成功：
+  1. 创建 `hs_hmd_centralized`
+  2. 执行 `Apply(changes)` 同步 `hs_hpd_listing` / `hs_hpd_miniapp_listing` / `hs_hpd_publisher_listing`
+  3. 创建当前房东对该项目的 `hs_hpd_root_scope_relation`（主归属键为 `owner_user_id`）
+- 当前 Mongo 环境未启用事务，后端必须做应用层补偿一致性。
+- 如果第 2 步或第 3 步失败，后端必须回滚第 1 步，不能留下“已创建但当前房东不可见”的孤儿项目。
 
 ### 5.3 `POST /api/v1/centralized_project/detail`
 
@@ -834,6 +844,15 @@ interface PublishListResp<T> {
 | `subway_station` | string | 否 | 附近地铁站 |
 
 响应：`ApiResponse<DecentralizedCommunity>`
+
+约束：
+
+- 成功语义包含三步同时成功：
+  1. 创建 `hs_hmd_decentralized`
+  2. 执行 `Apply(changes)` 同步 `hs_hpd_listing` / `hs_hpd_miniapp_listing` / `hs_hpd_publisher_listing`
+  3. 创建当前房东对该小区的 `hs_hpd_root_scope_relation`（主归属键为 `owner_user_id`）
+- 当前 Mongo 环境未启用事务，后端必须做应用层补偿一致性。
+- 如果第 2 步或第 3 步失败，后端必须回滚第 1 步，不能留下“已创建但当前房东不可见”的孤儿小区。
 
 ### 9.3 `POST /api/v1/decentralized_community/detail`
 

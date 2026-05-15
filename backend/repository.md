@@ -18,7 +18,7 @@
 ## 当前口径
 
 - `internal/repository/miniapp_auth`：小程序认证相关 collection，包含 `user`、`user_auth`、`user_profile_ext`。
-- `internal/repository/publish_auth`：publish 员工登录与权限相关 collection，包含 `adm_staff`、`adm_role`、`adm_permission`、`adm_staff_role`、`adm_role_permission`、`adm_login_log`。
+- `internal/repository/publish_auth`：publish 房东登录相关 collection，当前只承载 `hs_usr_user` 的房东手机号查询。
 - `internal/repository/favorite`、`history`：直接对应小程序用户行为接口模块。
 - `internal/repository/hmd`、`hpd`：当前上层模块名本身已唯一，因此不额外加 terminal 前缀。
 

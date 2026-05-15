@@ -5,6 +5,7 @@
 - 本文档定义房源发布与展示层集合与字段。
 - HPD 不直接等同某一个前端页面；它包含发布主实体和各前端 read model。
 - 当前第一期只落地小程序展示层。
+- 当前第二期开始补发房端/房东端读模型。
 - 公共字段见 [common-fields.md](./common-fields.md)。
 
 ## 2. 设计原则
@@ -18,14 +19,15 @@ HPD 分为两类数据：
 按前端/场景拆分的 read model：
   hs_hpd_miniapp_listing
   hs_hpd_admin_listing       // 后续设计，当前不建
-  hs_hpd_publisher_listing   // 后续设计，当前不建
+  hs_hpd_publisher_listing
 ```
 
 约定：
 
 - `hs_hpd_listing` 只保存统一 listing identity、来源和发布状态。
 - 小程序列表和详情只读 `hs_hpd_miniapp_listing`。
-- 后台管理、发房端/房东端后续各自设计 read model，不复用小程序展示表。
+- 发房端/房东端读 `hs_hpd_publisher_listing`。
+- 后台管理后续单独设计 read model，不复用小程序展示表。
 - 收藏、足迹、预约、审核、运营推荐等跨模块引用统一使用 `hs_hpd_listing._id`。
 - 不把后台审核字段、运管展示字段、小程序展示字段混在同一个 collection。
 
@@ -117,27 +119,86 @@ HPD 分为两类数据：
 - `contact_phone_1`
 - `staff_id_1_status_1`
 
-### 3.4 `hs_hpd_entrust_relation`
+### 3.4 `hs_hpd_publisher_listing`
 
-用途：房源委托关系与服务归属。当前发房端已用于房间创建后的 listing 归属登记和后续数据作用域判断。
+用途：发房端/房东端房源 read model。用于承载 publish 端房源列表、房源详情、状态浏览和后续筛选所需的聚合字段。
 
 | 字段 | 类型 | 必填 | 默认值 | 备注 |
 | --- | --- | --- | --- | --- |
 | `listing_id` | objectId | 是 | 无 | 关联 `hs_hpd_listing._id` |
-| `owner_name` | string | 否 | `""` | 发房方/业主名称 |
-| `owner_phone` | string | 否 | `""` | 发房方联系电话 |
-| `maintainer_staff_id` | objectId | 否 | 无 | 维护员工 |
-| `service_staff_id` | objectId | 否 | 无 | 服务员工 |
-| `relation_status` | int | 是 | `1` | 委托关系状态 |
+| `source_type` | string | 是 | 无 | 冗余 `hs_hpd_listing.source_type` |
+| `source_id` | objectId | 是 | 无 | 冗余 `hs_hpd_listing.source_id` |
+| `asset_mode` | string | 是 | 无 | 房源类型：`centralized` / `decentralized` |
+| `root_type` | string | 是 | 无 | `centralized_project` / `decentralized_community` |
+| `root_id` | objectId | 是 | 无 | 对应 root 主档 ID |
+| `project_id` | objectId | 否 | 无 | 集中式项目 ID |
+| `project_name` | string | 否 | `""` | 集中式项目名 |
+| `building_id` | objectId | 否 | 无 | 楼栋 ID |
+| `building_name` | string | 否 | `""` | 楼栋名 |
+| `room_type_id` | objectId | 否 | 无 | 房型 ID |
+| `room_type_name` | string | 否 | `""` | 房型名 |
+| `decentralized_id` | objectId | 否 | 无 | 分散式小区 ID |
+| `community_name` | string | 否 | `""` | 小区名 |
+| `rent_mode` | string | 是 | 无 | 租住方式 |
+| `city` | string | 是 | 无 | 城市 |
+| `district` | string | 否 | `""` | 区域 |
+| `biz_area` | string | 否 | `""` | 商圈 |
+| `subway_station` | string | 否 | `""` | 地铁站 |
+| `address_text` | string | 否 | `""` | 地址文案 |
+| `geo` | object | 否 | 无 | 坐标对象 `{lng,lat}` |
+| `room_no` | string | 是 | 无 | 房间号 |
+| `floor_no` | int | 否 | `0` | 楼层 |
+| `title` | string | 是 | 无 | publish 房源标题 |
+| `subtitle` | string | 否 | `""` | publish 房源副标题 |
+| `price` | int | 是 | `0` | 租金 |
+| `price_text` | string | 否 | `""` | 价格文案 |
+| `layout_text` | string | 否 | `""` | 户型文案 |
+| `area_size` | int | 否 | `0` | 面积 |
+| `orientation` | string | 否 | `""` | 朝向 |
+| `decoration_level` | string | 否 | `""` | 装修情况 |
+| `payment_cycle` | string | 否 | `""` | 付租方式 |
+| `deposit` | int | 否 | `0` | 押金 |
+| `service_fee` | int | 否 | `0` | 服务费 |
+| `agency_fee_mode` | string | 否 | `""` | 中介费模式 |
+| `agency_fee_value` | int | 否 | `0` | 中介费值 |
+| `room_status` | int | 是 | 无 | HMD 房态 |
+| `listing_status` | int | 是 | 无 | HPD 发布状态 |
+| `viewing_time_rule` | string | 否 | `""` | 看房时间规则 |
+| `start_rent_rule` | string | 否 | `""` | 起租规则 |
+| `feature_flags` | array<string> | 否 | `[]` | 结构化展示/筛选标记 |
+| `listing_facilities` | array<string> | 否 | `[]` | 房源配置 |
+| `room_facilities` | array<string> | 否 | `[]` | 房间配置 |
+| `images` | array<object> | 否 | `[]` | 房间图片 |
+| `is_online` | int | 是 | `0` | 是否在线 |
+
+索引：
+
+- `listing_id_1`（唯一）
+- `source_type_1_source_id_1`
+- `root_type_1_root_id_1_updated_at_-1`
+- `project_id_1_updated_at_-1`
+- `building_id_1_updated_at_-1`
+- `decentralized_id_1_updated_at_-1`
+- `room_status_1_listing_status_1_updated_at_-1`
+
+### 3.5 `hs_hpd_root_scope_relation`
+
+用途：房东 root 主档归属关系。用于表达 `project/community -> owner_user_id`，支撑 publish 房东端的根作用域判断。
+
+| 字段 | 类型 | 必填 | 默认值 | 备注 |
+| --- | --- | --- | --- | --- |
+| `root_type` | string | 是 | 无 | `centralized_project` / `decentralized_community` |
+| `root_id` | objectId | 是 | 无 | 关联 HMD root 主档 `_id` |
+| `owner_user_id` | objectId | 是 | 无 | 房东 user 主档 ID |
+| `owner_phone` | string | 否 | `""` | 房东手机号快照，便于展示与排查 |
+| `relation_status` | int | 是 | `1` | 归属关系状态 |
 | `effective_from` | int64 | 否 | `0` | 生效时间 |
 | `effective_to` | int64 | 否 | `0` | 失效时间 |
 
 索引：
 
-- `listing_id_1_active_unique`（唯一，partial：`status=1 && relation_status=1`）
-- `service_staff_id_1_relation_status_1_status_1`
-- `maintainer_staff_id_1_relation_status_1_status_1`
-- `owner_phone_1_relation_status_1_status_1`
+- `root_type_1_root_id_1_owner_user_id_1_active_unique`（唯一，partial：`status=1 && relation_status=1`）
+- `root_type_1_owner_user_id_1_relation_status_1_status_1`
 
 ## 4. 枚举字典
 
@@ -206,12 +267,13 @@ HPD 分为两类数据：
 
 适用字段：
 
-- `hs_hpd_entrust_relation.relation_status`
+- `hs_hpd_root_scope_relation.relation_status`
 
 ## 5. 读写约定
 
 - 小程序列表查询主读 `hs_hpd_miniapp_listing`。
 - 小程序详情查询主读 `hs_hpd_miniapp_listing`。
+- 发房端房源列表与详情后续主读 `hs_hpd_publisher_listing`。
 - 小程序接口不直接读取 HMD 集合。
 - `hs_hpd_listing` 不承载前端展示字段，只作为统一 listing identity 和发布状态源。
 - `hs_hpd_listing.listing_status` 是独立发布状态，不由 HMD `room_status` 自动推导。
@@ -219,6 +281,7 @@ HPD 分为两类数据：
 - 小程序可见性规则：`hs_hpd_listing.listing_status=3` 且 HMD `room_status=1` 时，`hs_hpd_miniapp_listing.is_online=1`；其他情况均为 `0`。
 - `hs_hpd_listing.listing_status` 或 HMD `room_status` 变化后，必须刷新 `hs_hpd_miniapp_listing.is_online`。
 - HMD 主数据变化后，必须按来源重建对应 `hs_hpd_miniapp_listing`。
+- HMD 主数据变化后，也必须按来源重建对应 `hs_hpd_publisher_listing`。
 - 后台管理与发房端/房东端 read model 后续单独设计，不从 `hs_hpd_miniapp_listing` 复用字段。
 - 第一阶段不实现审核/发布动作时，projector 不自动把新房源置为已上架；测试和联调可通过 seed 创建 `listing_status=3` 的 HPD 数据。
 

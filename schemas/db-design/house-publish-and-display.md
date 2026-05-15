@@ -14,8 +14,9 @@
 
 - `house_listing`
 - `house_listing_index`
+- `house_publisher_listing`
 - `house_contact`
-- `house_entrust_relation`
+- `house_root_scope_relation`
 
 ## 3. 集合设计
 
@@ -80,19 +81,39 @@
 - `status`：联系信息状态
 - `updated_at`：更新时间
 
-### 3.4 `house_entrust_relation`
+### 3.4 `house_publisher_listing`
 
 **功能说明**  
-房源委托关系。用于描述发房方、委托人、维护人、对接客服之间的业务关系。
+发房端/房东端房源读模型。用于承载房东在 publish 端查看自己房源时需要的聚合字段。
 
 **核心字段**
 
-- `relation_id`：委托关系唯一标识
 - `listing_id`：关联 `house_listing.listing_id`
-- `owner_name`：发房方或业主名称
-- `owner_phone`：发房方联系电话
-- `maintainer_staff_id`：当前维护员工
-- `service_staff_id`：当前服务员工
+- `source_type`：来源类型
+- `source_id`：来源对象标识
+- `root_type`：root 类型
+- `root_id`：项目或小区主档标识
+- `project_id / building_id / room_type_id / decentralized_id`
+- `project_name / building_name / room_type_name / community_name`
+- `city / district / biz_area / subway_station / address_text`
+- `room_no / floor_no`
+- `title / subtitle / price / price_text / layout_text`
+- `room_status / listing_status / is_online`
+- `images / listing_facilities / room_facilities`
+- `updated_at`
+
+### 3.5 `house_root_scope_relation`
+
+**功能说明**  
+房东 root 主档归属关系。用于描述某个项目或小区归哪个房东所有，并作为发房端 owner scope 的根锚点。
+
+**核心字段**
+
+- `relation_id`：归属关系唯一标识
+- `root_type`：root 类型，例如 `centralized_project`、`decentralized_community`
+- `root_id`：关联 root 主档标识
+- `owner_user_id`：房东 user 主档标识
+- `owner_phone`：房东手机号快照
 - `relation_status`：关系状态
 - `effective_from`：生效时间
 - `effective_to`：失效时间
