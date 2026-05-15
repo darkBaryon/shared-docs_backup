@@ -32,7 +32,7 @@
 
 ## 当前任务
 
-- 配合 [Publish Auth 与数据作用域计划](../backend-go/active/publish-auth-data-scope.md) 接入正式登录态和账号作用域；阶段 1 后端 publish auth 已实现并 review 通过，待阶段 2 前端登录态接入。
+- 配合 [Publish Auth 与数据作用域计划](../backend-go/active/publish-auth-data-scope.md) 接入正式登录态和账号作用域；阶段 2 前端登录态接入已实现并 review 通过，待阶段 3 后端 HPD entrust relation。
 - 页面工作台化收敛进入最终 review。
 - 等待真实后端 E2E 验证。
 
