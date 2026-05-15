@@ -3,7 +3,7 @@
 ## 当前链路
 
 - 小程序微信登录 / 注册由 `handler/v1/miniapp/auth` 和 `service/miniapp/auth` 处理。
-- 微信身份绑定、用户初始化等内部能力位于 `domain/auth`。
+- 微信身份绑定、用户初始化、资料扩展档兜底等逻辑收敛在 `service/miniapp/auth` 内部。
 - 登录成功后写入 Redis session。
 - 客户端通过 `Authorization: Bearer <token>` 访问受保护接口。
 - middleware 从 Redis 读取 session，并把用户信息写入 Gin context。

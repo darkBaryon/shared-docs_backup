@@ -33,7 +33,7 @@ Go 后端当前按“端侧应用服务 + 内部领域能力”组织：
 handler/v1/{terminal}/{module}
   -> service/{terminal}/{module}
     -> domain/{capability}
-      -> repository/{data-module}
+      -> repository/{module-or-terminal_module}
         -> MongoDB / Redis
 ```
 
@@ -42,16 +42,17 @@ handler/v1/{terminal}/{module}
 ```text
 handler/v1/miniapp/auth
   -> service/miniapp/auth
-    -> domain/auth
+    -> repository/miniapp_auth.UserAuthRepository / UserRepository / UserProfileExtRepository
 
 handler/v1/miniapp/house
   -> service/miniapp/house
-    -> repository/hpd
+    -> repository/hpd.MiniappListingRepository
 
 handler/v1/publish
   -> service/publish
     -> domain/hmd
-    -> domain/hpd
+    -> domain/listingprojection.Service
+    -> domain/publishaccess.Service
 ```
 
 ## 当前接口状态

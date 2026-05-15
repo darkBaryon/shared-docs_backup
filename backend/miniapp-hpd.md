@@ -72,7 +72,7 @@
 当前 `PublishService` 已经在 HMD 写操作成功后调用：
 
 ```text
-domain/hpd.Service.Apply(changes)
+domain/listingprojection.Service.Apply(changes)
 ```
 
 当前第一期 HPD 已接入真实 miniapp projector 调用。
@@ -83,7 +83,7 @@ domain/hpd.Service.Apply(changes)
 PublishService
   -> domain/hmd.Service 写 HMD
   -> HmdMutationResult{Entity, Changes}
-  -> domain/hpd.Service.Apply(changes)
+  -> domain/listingprojection.Service.Apply(changes)
     -> MiniappProjector
       -> 读取 HMD 当前源数据
       -> 生成 / 更新 hs_hpd_listing
@@ -113,7 +113,7 @@ HMD 写事务
 
 Worker
   -> 读取 outbox event
-  -> domain/hpd.Service.Apply(changes)
+  -> domain/listingprojection.Service.Apply(changes)
 ```
 
 ## 4. Projector 刷新规则
@@ -248,7 +248,7 @@ internal/handler/v1/miniapp/
 - `miniapp` 是前端端类型，不是后端业务模块。
 - 对外 API 模块已经确认是 `house`，不是 `miniapp`。
 - 后续还会有 `favorite`、`history`、`user` 等小程序端接口，必须继续按 `service/miniapp/{module}` 拆分，不能塞进 `service/miniapp` 单个大包。
-- HPD 是内部展示层 read model，不是对外 API 模块；`domain/hpd` 应继续只负责 projection / lifecycle / `Apply(changes)`，不承载小程序读 API。
+- HPD 是内部展示层 read model，不是对外 API 模块；`domain/listingprojection` 只负责 projection / lifecycle / `Apply(changes)`，不承载小程序读 API。
 
 最终依赖链必须是：
 
@@ -262,7 +262,7 @@ handler/v1/miniapp/house
 明确禁止：
 
 ```text
-handler -> domain/hpd projector
+handler -> domain/listingprojection projector
 handler -> repository/hpd
 handler -> hmd
 service/miniapp/house -> hmd
@@ -274,9 +274,10 @@ service/miniapp/house -> hmd
 
 ```text
 internal/model/
-  hpd.go
-  hpd_enum.go
-  hpd_validation.go
+  hpd/
+    model.go
+    enum.go
+    validation.go
 ```
 
 职责：
@@ -321,7 +322,7 @@ internal/repository/hpd/
 ### 8.3 HPD Projection Service
 
 ```text
-internal/domain/hpd/
+internal/domain/listingprojection/
   service.go
   miniapp_projector.go
   miniapp_mapper.go
@@ -347,9 +348,9 @@ internal/domain/hpd/
 
 约束：
 
-- `domain/hpd` 只负责 HPD projection / lifecycle / `Apply(changes)`。
-- `domain/hpd` 不对外提供 `house/search` 或 `house/public_detail` 读 API。
-- handler 不直接调用 `domain/hpd` projector。
+- `domain/listingprojection` 只负责 HPD projection / lifecycle / `Apply(changes)`。
+- `domain/listingprojection` 不对外提供 `house/search` 或 `house/public_detail` 读 API。
+- handler 不直接调用 `domain/listingprojection` projector。
 
 ### 8.4 House Read Service
 
@@ -393,8 +394,8 @@ internal/service/miniapp/house/
   - 定义 `DetailResult`。
   - 定义 `Detail`。
 - `mapper.go`
-  - `model.HpdMiniappListing -> ListItem`。
-  - `model.HpdMiniappListing -> Detail`。
+  - `hpd.HpdMiniappListing -> ListItem`。
+  - `hpd.HpdMiniappListing -> Detail`。
   - 负责 ObjectID 转 hex、枚举转 string、图片/费用对象复制。
 - `filter.go`
   - `SearchInput -> repository/hpd.MiniappListingSearchFilter`。
@@ -409,8 +410,8 @@ internal/service/miniapp/house/
 
 - `service/miniapp/house` 只能依赖 `repository/hpd.MiniappListingRepository`。
 - `service/miniapp/house` 不能依赖 HMD repository / HMD service。
-- `service/miniapp/house` 不能调用 `domain/hpd` projector。
-- `service/miniapp/house` 返回业务结果，不直接返回 `model.HpdMiniappListing`。
+- `service/miniapp/house` 不能调用 `domain/listingprojection` projector。
+- `service/miniapp/house` 返回业务结果，不直接返回 `hpd.HpdMiniappListing`。
 
 ### 8.5 House Handler
 
@@ -457,7 +458,7 @@ internal/handler/v1/miniapp/house/
 
 - handler 只做 JSON bind、ObjectID 解析、调 service、`response.Success` / `response.Err`。
 - handler 不直接调用 `repository/hpd`。
-- handler 不直接调用 `domain/hpd` projector。
+- handler 不直接调用 `domain/listingprojection` projector。
 - handler 不直接读取 HMD。
 - 小程序 API 请求和响应字段统一使用 snake_case。
 - 不得直接返回 Go model JSON。
@@ -480,7 +481,7 @@ limit
 
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
-| `asset_mode` | `model.HpdAssetMode` | `centralized` / `decentralized` |
+| `asset_mode` | `hpd.HpdAssetMode` | `centralized` / `decentralized` |
 | `keyword` | string | 关键词搜索 |
 | `feature_flags` | `[]string` | 结构化筛选标记 |
 
@@ -621,7 +622,7 @@ is_online_1_weight_score_-1_updated_at_-1
 1. 定稿小程序查询 API 路径。
 2. 补 `model/hpd*`。
 3. 补 `repository/hpd` 基础能力。
-4. 实现 `domain/hpd.Service.Apply(changes)` 的 miniapp projector。
+4. 实现 `domain/listingprojection.Service.Apply(changes)` 的 miniapp projector。
 5. 实现 HMD -> HPD miniapp read model 映射。
 
 接下来：
@@ -643,7 +644,7 @@ is_online_1_weight_score_-1_updated_at_-1
 - 小程序只读 HPD，不读 HMD。
 - `domain/hmd.Service` 不直接依赖 HPD。
 - projector 根据 HMD 当前源数据重建 HPD，不接收 handler 拼好的展示字段。
-- `domain/hpd` 继续只负责 projection / lifecycle / `Apply(changes)`。
+- `domain/listingprojection` 继续只负责 projection / lifecycle / `Apply(changes)`。
 - `service/miniapp/house` 负责小程序找房读查询。
 - `handler/v1/miniapp/house` 是小程序端 API 层；目录按端侧分组，路由仍按 API 模块 `house` 保持 `/api/v1/house/*`。
 - 小程序接口请求和响应字段必须使用 snake_case。

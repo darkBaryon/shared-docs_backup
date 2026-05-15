@@ -10,21 +10,28 @@
 handler/v1/{terminal}/{module}
   -> service/{terminal}/{module}
     -> domain/{capability}
-      -> repository/{data-module}
+      -> repository/{module-or-terminal_module}
         -> MongoDB / Redis
 ```
 
 已确认的内部领域：
 
-- `internal/domain/auth`：微信身份、用户初始化、资料活跃时间维护。
 - `internal/domain/hmd`：房源主数据领域能力。
-- `internal/domain/hpd`：展示层 read model projection / lifecycle。
+- `internal/domain/listingprojection`：read model 投影。
+- `internal/domain/publishaccess`：发房归属关系与后续数据作用域基础。
 
 已确认的端侧应用服务：
 
 - `internal/service/miniapp/auth`
 - `internal/service/miniapp/house`
 - `internal/service/publish`
+
+其中 `internal/service/miniapp/auth` 内部直接承载微信登录、用户初始化、资料活跃时间维护，不再单独拆 `domain/miniappauth`。
+
+已确认的 repository 命名依据：
+
+- 按上层接口模块分包。
+- 同名模块跨 terminal 冲突时，加 terminal 前缀，例如 `miniapp_auth`、`publish_auth`。
 
 ## 已完成
 

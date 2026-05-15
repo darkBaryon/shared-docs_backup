@@ -166,7 +166,7 @@ Review 停点：
   - `ListActiveListingIDsByStaff`
   - `ListActiveListingIDsByOwnerPhone`
   - `CanAccessListing`
-- HPD domain 暴露根据 source 查 listing 的窄方法，供 publish service 在房间创建后拿到 listing_id。
+- `domain/publishaccess` 暴露根据 source 查 listing 的窄方法，供 publish service 在房间创建后拿到 listing_id。
 - 房间创建成功并完成 HPD projector 后，publish service 自动创建/更新 entrust relation：
   - staff principal：默认 `maintainer_staff_id=current_staff_id`，`service_staff_id=current_staff_id`。
   - user principal：默认 `owner_phone=current_user.phone`。
@@ -176,7 +176,7 @@ Review 停点：
 建议测试：
 
 ```text
-go test ./internal/model ./internal/repository/hpd ./internal/domain/hpd ./internal/service/publish
+go test ./internal/model ./internal/repository/hpd ./internal/domain/listingprojection ./internal/domain/publishaccess ./internal/service/publish
 ```
 
 Review 停点：
@@ -206,7 +206,7 @@ Review 停点：
 建议测试：
 
 ```text
-go test ./internal/handler/v1/publish ./internal/service/publish ./internal/domain/hpd
+go test ./internal/handler/v1/publish ./internal/service/publish ./internal/domain/listingprojection ./internal/domain/publishaccess
 ```
 
 需要覆盖：

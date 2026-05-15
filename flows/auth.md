@@ -9,7 +9,7 @@
   -> auth login/register
     -> handler/v1/miniapp/auth
       -> service/miniapp/auth
-        -> domain/auth
+        -> repository/miniapp_auth
       -> MongoDB user/auth/profile
       -> Redis session
   -> Authorization: Bearer <token>

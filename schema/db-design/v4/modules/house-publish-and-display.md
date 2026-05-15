@@ -119,7 +119,7 @@ HPD 分为两类数据：
 
 ### 3.4 `hs_hpd_entrust_relation`
 
-用途：房源委托关系与服务归属。当前小程序 HPD 第一期不实现，后续发房端/后台管理接入时再落地。
+用途：房源委托关系与服务归属。当前发房端已用于房间创建后的 listing 归属登记和后续数据作用域判断。
 
 | 字段 | 类型 | 必填 | 默认值 | 备注 |
 | --- | --- | --- | --- | --- |
@@ -134,9 +134,10 @@ HPD 分为两类数据：
 
 索引：
 
-- `listing_id_1_status_1`
-- `service_staff_id_1_status_1`
-- `owner_phone_1_status_1`
+- `listing_id_1_active_unique`（唯一，partial：`status=1 && relation_status=1`）
+- `service_staff_id_1_relation_status_1_status_1`
+- `maintainer_staff_id_1_relation_status_1_status_1`
+- `owner_phone_1_relation_status_1_status_1`
 
 ## 4. 枚举字典
 

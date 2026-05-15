@@ -21,8 +21,8 @@ HPD 未完成前，不应让小程序直接依赖 HMD 主数据结构。
 
 - `house` 是对外 API 模块；`miniapp` 是端类型，用于代码目录分组，不进入 URL。
 - `service/miniapp/house` 只读 HPD read model，不读 HMD。
-- `handler/v1/miniapp/house` 不直接调用 `repository/hpd`，也不调用 `domain/hpd` projector。
-- `domain/hpd` 继续只负责 HPD projection / lifecycle / `Apply(changes)`。
+- `handler/v1/miniapp/house` 不直接调用 `repository/hpd`，也不调用 `domain/listingprojection` projector。
+- `domain/listingprojection` 继续只负责 HPD projection / lifecycle / `Apply(changes)`。
 
 ## 写入来源
 
@@ -30,7 +30,7 @@ HPD 未完成前，不应让小程序直接依赖 HMD 主数据结构。
 发房端 publish API
   -> PublishService
     -> domain/hmd.Service 写 HMD
-    -> domain/hpd.Service.Apply(changes)
+    -> domain/listingprojection.Service.Apply(changes)
       -> MiniappProjector
         -> 生成 hs_hpd_listing
         -> 生成 hs_hpd_miniapp_listing

@@ -6,18 +6,20 @@
 handler/v1/publish
   -> service/publish/PublishService
     -> domain/hmd.Service 写 HMD，并返回 HmdMutationResult
-    -> domain/hpd.Service.Apply(changes)
+    -> domain/listingprojection.Service.Apply(changes)
+    -> domain/publishaccess.Service 登记/校验发房归属
     -> repository/hmd
+    -> repository/hpd.EntrustRelationRepository
 ```
 
 ## 当前阶段
 
 - HMD domain service 已拆到 `internal/domain/hmd`。
-- HPD domain service 已拆到 `internal/domain/hpd`。
+- HPD 相关 domain 按业务能力拆包：`domain/listingprojection.Service` 负责 HMD -> HPD read model 投影，`domain/publishaccess.Service` 负责发房端 listing 归属关系。
 - PublishService 是 handler 的唯一入口。
 - `internal/service/publish` 顶层只保留 应用服务 和对外输入类型别名，不承载 HMD 具体实现。
 - HMD 写操作返回 `Entity + Changes`。
-- PublishService 统一把 changes 交给 `domain/hpd.Service.Apply`。
+- PublishService 统一把 changes 交给 `domain/listingprojection.Service.Apply`。
 - HPD 已接入第一期小程序 projector，后续 outbox worker 复用同一套投影逻辑。
 - Publish 第一阶段 HMD 链路已完成真实服务联调，route / middleware / Redis session / handler / service / Mongo 落库均已验证通过。
 
@@ -52,7 +54,9 @@ internal/handler/v1/publish/
 internal/service/publish/
   service.go
   types.go
-  dependencies.go
+  ports.go
+  publisher.go
+  room_entrust.go
   centralized_project.go
   building.go
   room_type.go
@@ -67,11 +71,16 @@ internal/domain/hmd/
   errors.go
   mapper.go
 
-internal/domain/hpd/
+internal/domain/listingprojection/
   service.go
   miniapp_projector.go
   miniapp_mapper.go
   miniapp_fanout.go
+  errors.go
+
+internal/domain/publishaccess/
+  service.go
+  repository.go
   errors.go
 ```
 
@@ -80,9 +89,11 @@ internal/domain/hpd/
 - `publish/service.go`：只做 应用服务 编排，handler 只依赖这一层。
 - `publish/types.go`：保留 应用服务 对外输入类型，避免 handler 直接依赖 HMD 子包。
 - `publish/{object}.go`：按业务对象放 publish action，避免 `service.go` 变成透传总线。
-- `publish/dependencies.go`：放 publish 入口需要的窄接口。
+- `publish/ports.go`：放 publish 入口需要的窄接口。
 - `domain/hmd`：负责 HMD 主数据写入、依赖校验、重复校验、mutation changes 和 service 错误语义。
-- `domain/hpd`：负责展示层同步入口和 HPD projector，不放在 publish 目录下。
+- `domain/listingprojection.Service`：负责 HMD mutation 到 HPD read model 的同步入口。
+- `domain/listingprojection.MiniappProjector`：只负责小程序 read model 映射和刷新。
+- `domain/publishaccess.Service`：只负责发房端 listing 与 principal 的委托/维护关系，不写 HMD。
 
 错误约束：
 
