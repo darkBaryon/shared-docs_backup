@@ -53,14 +53,12 @@ src/
 
   assets/
     css/
+      app.scss
       discover/
         discover.scss
         DiscoverSearchPanel.scss
       house-detail/
         house-detail.scss
-
-  styles/
-    app.scss
 
   utils/
     http.ts
@@ -235,7 +233,7 @@ src/assets/css/login/
 
 - 页面路由文件旁边不继续堆大量 `.scss`。
 - 页面和组件样式统一放入 `src/assets/css/{module}/`。
-- 跨页面公共样式放 `src/styles/`。
+- 跨页面公共样式放 `src/assets/css/`。
 - 迁移时允许小步移动，不要求一次性全量改目录。
 
 ## 8. 当前迁移策略
