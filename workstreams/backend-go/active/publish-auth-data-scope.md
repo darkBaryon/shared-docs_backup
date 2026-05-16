@@ -8,7 +8,7 @@
 - `publish_auth/login` 的 `phone` 是房东手机号，不是员工手机号。
 - `publish` session principal 固定为：
   - `terminal=publish`
-  - `principal_type=user`
+  - `principal_type=landlord`
 - publish 数据作用域主线应改为：
   - `project -> owner`
   - `community -> owner`
@@ -31,9 +31,9 @@
   - `POST /api/v1/publish_auth/login`
   - `POST /api/v1/publish_auth/session`
   - `POST /api/v1/publish_auth/logout`
-- `login` 当前继续使用本地联调的手机号直登。
-- 登录来源改为 `hs_usr_user.phone`。
-- session principal 改为 `principal_type=user`。
+- `login` 正式使用房东账号密码登录。
+- 登录主体来自 `hs_lld_landlord.phone`，认证数据来自 `hs_lld_auth`。
+- session principal 改为 `principal_type=landlord`。
 - `role_codes`、`permission_codes` 保留字段，但当前对 publish 主线为空数组。
 
 ### Publish Scope
@@ -53,13 +53,13 @@
 - 字段最小集合建议：
   - `root_type`：`centralized_project` / `decentralized_community`
   - `root_id`
-  - `owner_user_id`
+  - `owner_landlord_id`
   - `owner_phone`（冗余快照，可选）
   - `relation_status`
   - `effective_from`
   - `effective_to`
 - 只表达 root 主档归属，不混入 listing/service/staff 语义。
-- `owner_user_id` 是主归属键；`owner_phone` 不能作为长期归属主键，只能作为冗余快照。
+- `root_type + root_id` 表达一个 root 主档的唯一 active 归属；`owner_landlord_id` 是房东主体外键与查询键；`owner_phone` 不能作为长期归属主键，只能作为冗余快照。
 - `POST /api/v1/centralized_project/create`、`POST /api/v1/decentralized_community/create` 必须保证 “HMD 主档 + HPD projections + root scope relation” 同成同败；当前 Mongo 未启用事务，按应用层补偿回滚实现。
 
 ### 为什么要补这一层
@@ -73,7 +73,7 @@
 - 删除 publish 主线中的 `staff` principal 分支。
 - 删除 `super_admin` / `house.manage` / role / permission 对 publish scope 的影响。
 - 删除旧的 listing 反推 `project/community` 可见性的主路径。
-- 删除 publish auth / service / test / 文档中残留的“员工登录”“staff scope”“全局 staff”表述。
+- 删除 publish auth / service / test / 文档中残留的员工端权限口径。
 
 ### 实施顺序
 
@@ -90,21 +90,15 @@
 所有 publish 文档统一按以下表述维护：
 
 - “房东手机号登录”
-- “publish 登录主体是房东 user”
+- “publish 登录主体是房东 landlord”
 - “房东只能看自己名下的项目 / 小区 / 楼栋 / 房型 / 房间”
 - “前端不传身份过滤字段”
 
-必须删除或改写的旧表述：
-
-- “publish Web MVP 优先 staff”
-- “local 按员工手机号登录”
-- “publish 复用 hs_adm_staff / adm_role / adm_permission”
-- “super_admin / house.manage 可见全量”
-- “非全局 staff 只能访问自己维护/服务的房源”
+旧员工端口径不得再作为 publish 主线出现；涉及后台员工、角色、权限的描述只能归入 admin 后台场景。
 
 ## 测试要求
 
-- `publish_auth/login`：本地环境下，存在 `hs_usr_user.phone` 时可成功登录。
-- `publish_auth/session`：只接受 `publish + user` session。
+- `publish_auth/login`：存在 `hs_lld_landlord.phone` 且 `hs_lld_auth.password_hash` 校验通过时可成功登录。
+- `publish_auth/session`：只接受 `publish + landlord` session。
 - root owner scope：创建项目 / 小区后，房东立刻可见且可继续新增下级对象。
 - `publish service`：房东只能看和修改自己名下的项目、小区、楼栋、房型、房间。

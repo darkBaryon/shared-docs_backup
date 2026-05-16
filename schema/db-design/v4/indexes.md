@@ -15,6 +15,8 @@
 - `hs_adm_role_permission`: `role_id_1_permission_id_1`
 - `hs_hpd_listing`: `source_type_1_source_id_1`
 - `hs_hpd_miniapp_listing`: `listing_id_1`
+- `hs_hpd_publisher_listing`: `listing_id_1`
+- `hs_hpd_root_scope_relation`: `root_type_1_root_id_1_active_unique`（partial：`status=1 && relation_status=1`）
 - `hs_usr_favorite`: `user_id_1_listing_id_1`
 - `hs_usr_history`: `user_id_1_listing_id_1`
 

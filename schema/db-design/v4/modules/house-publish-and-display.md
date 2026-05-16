@@ -201,7 +201,7 @@ HPD 分为两类数据：
 
 索引：
 
-- `root_type_1_root_id_1_owner_landlord_id_1_active_unique`（唯一，partial：`status=1 && relation_status=1`）
+- `root_type_1_root_id_1_active_unique`（唯一，partial：`status=1 && relation_status=1`）
 - `root_type_1_owner_landlord_id_1_relation_status_1_status_1`
 
 ## 4. 枚举字典
