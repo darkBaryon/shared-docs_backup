@@ -4,6 +4,11 @@
 - `hs_usr_user`: `phone_1`
 - `hs_usr_auth`: `auth_provider_1_openid_1`
 - `hs_usr_profile_ext`: `user_id_1`
+- `hs_lld_landlord`: `phone_1`
+- `hs_lld_auth`: `landlord_id_1`
+- `hs_lld_profile`: `landlord_id_1`
+- `hs_adm_staff`: `phone_1`
+- `hs_adm_staff_auth`: `staff_id_1`
 - `hs_adm_role`: `role_code_1`
 - `hs_adm_permission`: `permission_code_1`
 - `hs_adm_staff_role`: `staff_id_1_role_id_1`
@@ -20,6 +25,10 @@
   - `is_online_1_weight_score_-1_updated_at_-1`
 - `hs_hpd_listing`:
   - `listing_status_1_updated_at_-1`
+- `hs_hpd_publisher_listing`:
+  - `owner_landlord_id_1_updated_at_-1`
+  - `root_type_1_root_id_1_updated_at_-1`
+  - `room_status_1_listing_status_1_updated_at_-1`
 - `hs_usr_favorite`:
   - `user_id_1_status_1_updated_at_-1`
 - `hs_usr_history`:

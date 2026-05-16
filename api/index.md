@@ -12,8 +12,7 @@
 
 - [miniapp-api.md](./miniapp-api.md)：小程序接口文档。
 - [publish.md](./publish.md)：发房系统接口文档。
-
-后续后台管理端接口单独新增对应 API 文档，不合并到小程序或发房系统文档中。
+- [admin.md](./admin.md)：管理后台接口文档。
 
 ## 通用文档
 

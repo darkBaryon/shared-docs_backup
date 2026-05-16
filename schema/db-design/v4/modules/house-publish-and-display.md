@@ -129,6 +129,9 @@ HPD 分为两类数据：
 | `source_type` | string | 是 | 无 | 冗余 `hs_hpd_listing.source_type` |
 | `source_id` | objectId | 是 | 无 | 冗余 `hs_hpd_listing.source_id` |
 | `asset_mode` | string | 是 | 无 | 房源类型：`centralized` / `decentralized` |
+| `owner_landlord_id` | objectId | 是 | 无 | 房东主体 `hs_lld_landlord._id`，便于发房端和后台按房东筛选 |
+| `owner_phone_snapshot` | string | 否 | `""` | 房东手机号快照 |
+| `landlord_name_snapshot` | string | 否 | `""` | 房东展示名快照；`hs_lld_profile` 未实现前可为空 |
 | `root_type` | string | 是 | 无 | `centralized_project` / `decentralized_community` |
 | `root_id` | objectId | 是 | 无 | 对应 root 主档 ID |
 | `project_id` | objectId | 否 | 无 | 集中式项目 ID |
@@ -175,6 +178,7 @@ HPD 分为两类数据：
 
 - `listing_id_1`（唯一）
 - `source_type_1_source_id_1`
+- `owner_landlord_id_1_updated_at_-1`
 - `root_type_1_root_id_1_updated_at_-1`
 - `project_id_1_updated_at_-1`
 - `building_id_1_updated_at_-1`
@@ -183,13 +187,13 @@ HPD 分为两类数据：
 
 ### 3.5 `hs_hpd_root_scope_relation`
 
-用途：房东 root 主档归属关系。用于表达 `project/community -> owner_user_id`，支撑 publish 房东端的根作用域判断。
+用途：房东 root 主档归属关系。用于表达 `project/community -> owner_landlord_id`，支撑 publish 房东端的根作用域判断。
 
 | 字段 | 类型 | 必填 | 默认值 | 备注 |
 | --- | --- | --- | --- | --- |
 | `root_type` | string | 是 | 无 | `centralized_project` / `decentralized_community` |
 | `root_id` | objectId | 是 | 无 | 关联 HMD root 主档 `_id` |
-| `owner_user_id` | objectId | 是 | 无 | 房东 user 主档 ID |
+| `owner_landlord_id` | objectId | 是 | 无 | 房东主体 `hs_lld_landlord._id` |
 | `owner_phone` | string | 否 | `""` | 房东手机号快照，便于展示与排查 |
 | `relation_status` | int | 是 | `1` | 归属关系状态 |
 | `effective_from` | int64 | 否 | `0` | 生效时间 |
@@ -197,8 +201,8 @@ HPD 分为两类数据：
 
 索引：
 
-- `root_type_1_root_id_1_owner_user_id_1_active_unique`（唯一，partial：`status=1 && relation_status=1`）
-- `root_type_1_owner_user_id_1_relation_status_1_status_1`
+- `root_type_1_root_id_1_owner_landlord_id_1_active_unique`（唯一，partial：`status=1 && relation_status=1`）
+- `root_type_1_owner_landlord_id_1_relation_status_1_status_1`
 
 ## 4. 枚举字典
 

@@ -18,7 +18,7 @@
 ## 当前口径
 
 - `internal/repository/miniapp_auth`：小程序认证相关 collection，包含 `user`、`user_auth`、`user_profile_ext`。
-- `internal/repository/publish_auth`：publish 房东登录相关 collection，当前只承载 `hs_usr_user` 的房东手机号查询。
+- `internal/repository/publish_auth`：publish 房东登录相关 collection，正式设计应承载 `hs_lld_landlord` / `hs_lld_auth` 查询；若当前代码仍存在 `hs_usr_user` 本地联调实现，只视为临时过渡。
 - `internal/repository/favorite`、`history`：直接对应小程序用户行为接口模块。
 - `internal/repository/hmd`、`hpd`：当前上层模块名本身已唯一，因此不额外加 terminal 前缀。
 

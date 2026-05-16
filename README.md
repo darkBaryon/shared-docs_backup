@@ -16,11 +16,13 @@
 2. [workstreams/backend-go/status.md](./workstreams/backend-go/status.md)：Go 后端当前状态和下一步。
 3. [workstreams/publish-web/status.md](./workstreams/publish-web/status.md)：出房 Web 当前状态和下一步。
 4. [workstreams/miniapp/status.md](./workstreams/miniapp/status.md)：小程序前端当前状态和下一步。
-5. [api/miniapp-api.md](./api/miniapp-api.md)：小程序接口契约。
-6. [api/publish.md](./api/publish.md)：发房端接口契约。
-7. [backend/architecture.md](./backend/architecture.md)：Go 后端分层和代码边界。
-8. [schema/db-design/v4/index.md](./schema/db-design/v4/index.md)：数据库设计入口。
-9. [frontend/development-spec.md](./frontend/development-spec.md)：前端目标架构、分层和目录规范。
+5. [workstreams/admin-web/status.md](./workstreams/admin-web/status.md)：管理后台当前状态和下一步。
+6. [api/miniapp-api.md](./api/miniapp-api.md)：小程序接口契约。
+7. [api/publish.md](./api/publish.md)：发房端接口契约。
+8. [api/admin.md](./api/admin.md)：管理后台接口骨架。
+9. [backend/architecture.md](./backend/architecture.md)：Go 后端分层和代码边界。
+10. [schema/db-design/v4/index.md](./schema/db-design/v4/index.md)：数据库设计入口。
+11. [frontend/development-spec.md](./frontend/development-spec.md)：前端目标架构、分层和目录规范。
 
 具体任务计划不要塞进 `status.md`，应放在对应端的 `workstreams/{app}/active/`。
 Review report 放在对应端的 `workstreams/{app}/reviews/`。
@@ -68,11 +70,12 @@ handler/v1/publish
   - `POST /api/v1/house/public_detail`
 - 小程序用户资料、收藏、足迹：见 [api/miniapp-api.md](./api/miniapp-api.md)。
 - 发房端第一阶段 HMD 接口：见 [api/publish.md](./api/publish.md)。
+- 管理后台接口骨架：见 [api/admin.md](./api/admin.md)。
 
 待接入：
 
 - 小程序看房计划、通知中心：见 [workstreams/backend-go/active/miniapp-followups.md](./workstreams/backend-go/active/miniapp-followups.md)。
-- 管理端 API：尚未开始，后续单独设计。
+- 管理后台前后端：见 [workstreams/admin-web/index.md](./workstreams/admin-web/index.md)。
 
 ## 目录怎么用
 

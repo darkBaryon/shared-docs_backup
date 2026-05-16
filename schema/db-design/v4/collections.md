@@ -1,10 +1,14 @@
 # V4 集合与职责（跨端统一）
 
-## A. 账号与权限（usr/adm）
-- `hs_usr_user`：C 端用户主档
-- `hs_usr_auth`：C 端认证绑定
-- `hs_usr_profile_ext`：C 端偏好扩展
-- `hs_adm_staff`：后台员工
+## A. 账号与权限（usr/lld/adm）
+- `hs_usr_user`：小程序用户主档
+- `hs_usr_auth`：小程序用户认证绑定
+- `hs_usr_profile_ext`：小程序用户偏好扩展
+- `hs_lld_landlord`：发房端房东主体
+- `hs_lld_auth`：发房端房东认证
+- `hs_lld_profile`：发房端房东业务资料
+- `hs_adm_staff`：后台员工主体
+- `hs_adm_staff_auth`：后台员工认证
 - `hs_adm_role`：后台角色
 - `hs_adm_permission`：后台权限点
 - `hs_adm_staff_role`：员工-角色关系

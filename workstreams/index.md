@@ -36,3 +36,4 @@ workstreams/{app}/
 - [backend-go](./backend-go/index.md)：Go 后端迁移和后端能力建设。
 - [publish-web](./publish-web/index.md)：出房 Web 前端。
 - [miniapp](./miniapp/index.md)：小程序前端。
+- [admin-web](./admin-web/index.md)：管理后台前后端设计与实现。
