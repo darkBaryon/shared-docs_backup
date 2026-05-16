@@ -44,7 +44,7 @@ session value 必须保存结构化 principal JSON，而不是只保存字符串
 ## 终端边界
 
 - `miniapp`：小程序登录入口，只产生 `terminal=miniapp` 的 session；固定 `principal_type=user`。
-- `publish`：房东出房 Web 登录入口使用 `POST /api/v1/publish_auth/login`、`session`、`logout`；正式方案固定产生 `terminal=publish`、`principal_type=landlord` 的 session，登录主档来自 `hs_lld_landlord`，认证数据来自 `hs_lld_auth`。
+- `publish`：房东出房 Web 登录入口使用 `POST /api/v1/publish_auth/login`、`session`、`logout`；正式方案固定产生 `terminal=publish`、`principal_type=landlord` 的 session，登录主体按 `hs_lld_landlord.phone` 定位，认证数据来自 `hs_lld_auth.password_hash`。
 - `admin`：后台管理登录入口独立设计，固定产生 `terminal=admin`、`principal_type=staff` 的 session；登录主档来自 `hs_adm_staff`，认证数据来自 `hs_adm_staff_auth`。
 
 约束：

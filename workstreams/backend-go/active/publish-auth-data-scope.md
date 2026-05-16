@@ -32,7 +32,7 @@
   - `POST /api/v1/publish_auth/session`
   - `POST /api/v1/publish_auth/logout`
 - `login` 正式使用房东账号密码登录。
-- 登录主体来自 `hs_lld_landlord.phone`，认证数据来自 `hs_lld_auth`。
+- 登录主体来自 `hs_lld_landlord.phone`，认证数据来自 `hs_lld_auth.password_hash`。
 - session principal 改为 `principal_type=landlord`。
 - `role_codes`、`permission_codes` 保留字段，但当前对 publish 主线为空数组。
 

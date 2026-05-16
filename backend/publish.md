@@ -25,24 +25,39 @@ handler/v1/publish
 
 ## Handler 层
 
-Publish HTTP 入口放在独立子包：
+Publish HTTP 入口按接口模块拆子包：
 
 ```text
 internal/handler/v1/publish/
   handler.go
   routes.go
-  request_common.go
-  request_centralized.go
-  request_building.go
-  request_room_type.go
-  request_room.go
-  request_decentralized.go
-  response.go
+  common/
+    bind.go
+    dto.go
+  auth/
+    handler.go
+    dto.go
+  project/
+    handler.go
+    dto.go
+  building/
+    handler.go
+    dto.go
+  roomtype/
+    handler.go
+    dto.go
+  room/
+    handler.go
+    dto.go
+  community/
+    handler.go
+    dto.go
 ```
 
 约束：
 
 - `internal/handler/v1` 根包只保留通用 v1 handler，不继续堆 publish 业务文件。
+- 每个 publish 模块子包固定使用 `handler.go + dto.go`，不再继续引入 `request.go / response.go / routes.go` 的多风格并存写法。
 - handler request 只表达 HTTP 输入，不复用 service DTO 作为请求字段。
 - handler 显式把 HTTP request 转成 `service/publish` input。
 - handler 不直接调用 HMD domain service 或 repository。
@@ -128,7 +143,8 @@ publish 入口约束：
 - `building / room_type / room` 不单独存 owner，统一继承上级 `project/community` scope。
 - `POST /api/v1/centralized_project/create` 和 `POST /api/v1/decentralized_community/create` 是 root scope 建链入口。
 - 当前 Mongo 环境未启用事务，上述两个 create 接口必须在应用层做补偿一致性：先写 HMD，再执行 `Apply(changes)` 同步 HPD read model，最后写 root scope；若 `Apply(changes)` 或 root scope 任一步失败，必须回滚刚创建的 HMD 主档，不能留下房东不可见的孤儿项目/小区。
-- 列表接口先套数据作用域，再应用 city/district/name 等业务筛选。
+- root 列表接口先用 `root_scope_relation` 收口当前房东可见的 `project/community` ID，再应用 city/district/name 等业务筛选。
+- 子级列表接口先校验父级 root scope，再按父级 ID 查询 HMD 子表。
 - 详情、更新、房态等接口必须先证明当前 principal 可访问目标资源；无权访问时返回权限/不存在语义，不能依赖前端隐藏入口。
 - 前端请求中的 `user_id`、`landlord_id`、`staff_id`、owner、`owner_phone`、`maintainer_staff_id`、`service_staff_id` 等身份过滤字段一律不作为 publish 权限条件。
 

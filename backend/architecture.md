@@ -19,7 +19,7 @@ router
   -> handler/v1/{terminal}/{module}
     -> service/{terminal}/{module}
       -> domain/{capability}
-      -> repository/{module-or-terminal_module}
+      -> repository/{data-subdomain}
         -> pkg/database
 ```
 
@@ -195,16 +195,16 @@ router
 
 命名依据：
 
-- repository 按上层接口模块分包，不按纯数据库模块分包。
-- 上层模块名全局唯一时，目录直接使用模块名，例如 `favorite`、`history`、`hmd`、`hpd`。
-- 不同 terminal 存在同名模块时，必须加 terminal 前缀消歧，例如 `miniapp_auth`、`publish_auth`。
-- 禁止建立一个混合 `auth` 包同时服务 miniapp 和 publish 两套同名模块。
+- repository 按底层数据子域分包，不按 handler/service 的接口模块分包。
+- 包名优先表达“操作的是哪类 collection / 实体”，例如 `landlord`、`hmd`、`hpd`。
+- 一个 repository 包内可以包含多个 collection repository 文件，但这些 collection 必须共同属于一个稳定数据子域。
+- 禁止用 `publish_auth`、`miniapp_auth` 这类上层业务入口名给 repository 命名。
 
-为什么不是按数据库模块命名：
+为什么这样命名：
 
-- 因为 repository 是 service/domain 的直接依赖层，它的边界首先要对齐“谁在使用它”。
-- `model/auth` 可以同时容纳 `hs_usr_*` 和 `hs_adm_*`，因为 model 的职责是表达数据库模块。
-- 但 `repository` 如果也叫 `auth`，就会把 miniapp auth 和 publish auth 混在一起，破坏上层接口边界。
+- repository 关心的是“底层数据怎么查、怎么写”，不是“哪个前端接口在调用它”。
+- `service/publish/auth`、`service/miniapp/auth` 可以都是 `auth`，因为那是业务入口。
+- 但 repository 应该落回实体/collection 语义，例如 `landlord`、`user`、`staff`，这样 service 才能明确看出自己依赖了哪些底层数据对象。
 
 ### 3.6 model
 

@@ -8,6 +8,7 @@
 - [config.md](./config.md)：配置约定。
 - [auth.md](./auth.md)：认证与 session。
 - [publish.md](./publish.md)：发房域后端架构。
+- [interfaces/index.md](./interfaces/index.md)：按接口拆分的后端实现说明。
 - [admin.md](./admin.md)：管理后台后端边界。
 - [miniapp-hpd.md](./miniapp-hpd.md)：小程序 HPD 展示层规划。
 - [repository.md](./repository.md)：repository 约定。

@@ -2,13 +2,12 @@
 
 ## 约定
 
-- `repository` 目录按上层接口模块分包，不按纯数据库模块分包。
-- 模块名在全局唯一时，目录直接使用模块名，例如 `favorite`、`history`、`hmd`、`hpd`。
-- 模块名在不同 terminal 冲突时，目录必须使用 `{terminal}_{module}`，例如 `miniapp_auth`、`publish_auth`。
-- 禁止建立混合型 repository 包去同时承载多个 terminal 的同名模块。
-- 一个 repository 包里可以放多个 collection repository，但这些 collection 必须共同服务同一个上层模块边界。
+- `repository` 目录按底层数据子域分包，不按 handler/service 的接口模块分包。
+- 包名优先表达“操作的是哪类 collection / 实体”，例如 `landlord`、`hmd`、`hpd`、`favorite`、`history`。
+- 禁止建立混合型 repository 包去同时承载多个无关数据对象，也不要用 `publish_auth`、`miniapp_auth` 这种上层业务名给 repository 命名。
+- 一个 repository 包里可以放多个 collection repository，但这些 collection 必须属于同一数据子域。
 - 每个 collection 对应独立 repository 文件。
-- 集合较多时按模块建目录，例如 `internal/repository/hmd`、`internal/repository/miniapp_auth`。
+- 集合较多时按子域建目录，例如 `internal/repository/hmd`、`internal/repository/landlord`。
 - 通用 CRUD 放在 `internal/repository/common`。
 - `FindByID` 默认不返回软删除数据。
 - `UpdateBaseInfo` 必须使用字段白名单。
@@ -17,16 +16,17 @@
 
 ## 当前口径
 
-- `internal/repository/miniapp_auth`：小程序认证相关 collection，包含 `user`、`user_auth`、`user_profile_ext`。
-- `internal/repository/publish_auth`：publish 房东登录相关 collection，正式设计应承载 `hs_lld_landlord` / `hs_lld_auth` 查询；若当前代码仍存在 `hs_usr_user` 本地联调实现，只视为临时过渡。
-- `internal/repository/favorite`、`history`：直接对应小程序用户行为接口模块。
-- `internal/repository/hmd`、`hpd`：当前上层模块名本身已唯一，因此不额外加 terminal 前缀。
+- `internal/repository/landlord`：房东身份与认证数据，承载 `hs_lld_landlord` / `hs_lld_auth` 的底层查询。
+- `internal/repository/hmd`：房源主数据六个模块的底层读写。
+- `internal/repository/hpd`：发布/展示域数据与 root owner scope relation。
+- `internal/repository/favorite`、`history`：当前仍按独立 collection 能力维护，后续如果 user-behavior 子域扩大，再统一收目录。
+- `internal/repository/miniapp_auth` 属于旧命名，后续应继续向实体/子域命名收敛，不再新增同类命名。
 
 ## 判定规则
 
-- 如果一个 collection 只被某个 terminal 的某个模块使用，就跟那个模块走。
-- 如果多个 collection 总是被同一个上层模块一起编排，就允许放进同一个 repository 包。
-- 如果只是因为底层都属于同一个数据库大模块就想合包，这个理由无效。
+- 如果多个 collection 共同表达一个稳定的数据子域，就进入同一个 repository 包。
+- 如果只是某个 terminal 的某个接口暂时会同时调用几张表，不足以成为 repository 命名依据。
+- 如果一个包名读起来像业务动作或前端入口，例如 `publish_auth`、`admin_auth`，通常说明它更适合放在 service，而不是 repository。
 
 ## 实现补充
 

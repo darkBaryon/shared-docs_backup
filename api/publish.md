@@ -34,7 +34,6 @@ publish API request / response 字段统一使用 `snake_case`。
 
 ```text
 project_name
-project_code
 room_type_id
 room_status
 listing_facilities
@@ -44,7 +43,6 @@ listing_facilities
 
 ```text
 projectName
-projectCode
 roomTypeId
 roomStatus
 listingFacilities
@@ -156,12 +154,12 @@ POST /api/v1/publish_auth/logout
 
 | 字段 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
-| `phone` | string | 是 | 房东账号手机号 |
+| `phone` | string | 是 | 房东登录手机号 |
 | `password` | string | 是 | 账号密码；当前正式设计按密码登录 |
 
 约束：
 
-- 当前正式设计应使用 `hs_lld_landlord + hs_lld_auth` 做账号密码登录。
+- 当前正式设计应使用 `hs_lld_landlord.phone + hs_lld_auth.password_hash` 做手机号密码登录。
 - 当前代码里若仍存在 local 环境手机号直登，只视为联调临时实现，不作为正式契约。
 - 不提交 `terminal`，该接口固定生成 `terminal=publish` 的 principal。
 - 不提交 `user_id`、`landlord_id`、`staff_id`、owner 过滤字段。
@@ -306,8 +304,8 @@ images: Array<{
 
 | 对象 | 字段 | 唯一范围 | 说明 |
 | --- | --- | --- | --- |
-| 集中式项目 | `project_code` | 全局唯一 | 创建后不可更新 |
-| 集中式楼栋 | `building_code` | 全局唯一，空字符串不参与唯一性校验 | 创建后不可更新 |
+| 集中式项目 | `project_name + city` | 同一房东名下同城唯一 | 由 publish service 按当前房东 scope 校验，不是全局 Mongo 唯一索引 |
+| 集中式楼栋 | `project_id + building_name` | 同一项目内唯一 | 不再使用 `building_code` |
 | 集中式房型 | `room_type_name` | 同一项目内唯一；楼栋级房型还需在同一楼栋下唯一 | `project_id` / `building_id` 创建后不可更新 |
 | 集中式房间 | `room_no` | 同一楼栋内唯一 | `project_id` / `building_id` / `room_type_id` 创建后不可更新 |
 | 分散式小区 | `city + district + community_name` | 组合唯一 | `district` 为空时按空字符串参与组合唯一 |
@@ -430,7 +428,6 @@ interface PublishListResp<T> {
 | --- | --- | --- | --- |
 | `id` | string | 是 | 项目 ID |
 | `project_name` | string | 是 | 项目名称 |
-| `project_code` | string | 是 | 项目编码，业务唯一 |
 | `city` | string | 是 | 城市 |
 | `district` | string | 否 | 区域 |
 | `address_text` | string | 否 | 详细地址 |
@@ -450,7 +447,6 @@ interface PublishListResp<T> {
 | 字段 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
 | `project_name` | string | 是 | 项目名称 |
-| `project_code` | string | 是 | 项目编码，业务唯一 |
 | `city` | string | 是 | 城市 |
 | `district` | string | 否 | 区域 |
 | `address_text` | string | 否 | 详细地址 |
@@ -488,8 +484,6 @@ interface PublishListResp<T> {
 | `geo` | `GeoPoint` | 否 | 坐标 |
 | `brand_name` | string | 否 | 品牌名称 |
 
-说明：`project_code` 创建后不可通过此接口更新。
-
 响应：`ApiResponse<CentralizedProject>`
 
 ### 5.5 `POST /api/v1/centralized_project/list`
@@ -512,7 +506,6 @@ interface PublishListResp<T> {
 | `id` | string | 是 | 楼栋 ID |
 | `project_id` | string | 是 | 项目 ID |
 | `building_name` | string | 是 | 楼栋名称 |
-| `building_code` | string | 否 | 楼栋编码 |
 | `floor_total` | int | 否 | 总层数 |
 | `manager_name` | string | 否 | 管家姓名 |
 | `manager_phone` | string | 否 | 管家电话 |
@@ -533,7 +526,6 @@ interface PublishListResp<T> {
 | --- | --- | --- | --- |
 | `project_id` | string | 是 | 项目 ID |
 | `building_name` | string | 是 | 楼栋名称 |
-| `building_code` | string | 否 | 楼栋编码 |
 | `floor_total` | int | 否 | 总层数 |
 | `manager_name` | string | 否 | 管家姓名 |
 | `manager_phone` | string | 否 | 管家电话 |
@@ -562,7 +554,7 @@ interface PublishListResp<T> {
 | `photos` | array<string> | 否 | 楼栋/公寓外观图 URL |
 | `listing_facilities` | array<string> | 否 | 楼栋/小区配套枚举 |
 
-说明：`project_id`、`building_code` 创建后不可通过此接口更新。
+说明：`project_id` 创建后不可通过此接口更新。
 
 响应：`ApiResponse<Building>`
 
@@ -747,6 +739,7 @@ interface PublishListResp<T> {
 
 - `building_id` 必须属于 `project_id`。
 - `room_type_id` 可选；传入时必须属于同一项目或同一楼栋。
+- 传入 `room_type_id` 时，若房间请求里未填写 `layout_text / area_size / orientation / decoration_level / payment_cycle / rent / deposit / service_fee / agency_fee_mode / agency_fee_value / images / room_facilities`，后端会自动用房型模板值补齐；其中 `layout_text` 会优先按房型的 `room_count / hall_count / bathroom_count / kitchen_count` 组装。
 - 创建时 `room_status` 由后端默认写为 `1`，请求不提交。
 
 响应：`ApiResponse<CentralizedRoom>`
@@ -885,8 +878,8 @@ interface PublishListResp<T> {
 
 | 字段 | 类型 | 必填 | 说明 |
 | --- | --- | --- | --- |
-| `city` | string | 是 | 城市 |
-| `district` | string | 否 | 区域；不传表示列出城市下全部小区 |
+| `city` | string | 否 | 城市；不传表示按当前房东全部可见小区返回 |
+| `district` | string | 否 | 区域；仅作为当前房东可见小区范围内的附加筛选 |
 
 响应：`ApiResponse<PublishListResp<DecentralizedCommunityListItem>>`
 

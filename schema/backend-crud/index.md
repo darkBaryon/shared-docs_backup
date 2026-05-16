@@ -63,15 +63,11 @@
 
 - `Create(entity *model.HmdCentralized) error`
   - 用途：创建集中式项目主档。
-  - 参数：`entity` 必须包含 `project_name`、`project_code`、`city`。
+  - 参数：`entity` 必须包含 `project_name`、`city`。
   - 返回：创建失败返回 error。
 - `FindByID(id bson.ObjectID) (*model.HmdCentralized, error)`
   - 用途：按项目 ID 查询主档。
   - 参数：`id` 项目 ID。
-  - 返回：命中返回项目；未命中返回 `nil, nil`。
-- `FindByProjectCode(projectCode string) (*model.HmdCentralized, error)`
-  - 用途：按项目编码查询主档。
-  - 参数：`projectCode` 业务唯一项目编码。
   - 返回：命中返回项目；未命中返回 `nil, nil`。
 - `ListByCity(city string) ([]model.HmdCentralized, error)`
   - 用途：按城市列出有效集中式项目。
@@ -96,9 +92,9 @@
   - 用途：按楼栋 ID 查询主档。
   - 参数：`id` 楼栋 ID。
   - 返回：命中返回楼栋；未命中返回 `nil, nil`。
-- `FindByBuildingCode(buildingCode string) (*model.HmdBuilding, error)`
-  - 用途：按楼栋编码查询主档。
-  - 参数：`buildingCode` 楼栋编码。
+- `FindByProjectAndName(projectID bson.ObjectID, buildingName string) (*model.HmdBuilding, error)`
+  - 用途：按项目和楼栋名称查询主档。
+  - 参数：`projectID` 项目 ID；`buildingName` 楼栋名称。
   - 返回：命中返回楼栋；未命中返回 `nil, nil`。
 - `ListByProjectID(projectID bson.ObjectID) ([]model.HmdBuilding, error)`
   - 用途：列出某个项目下的楼栋。

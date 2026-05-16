@@ -87,7 +87,7 @@
 
 | 字段 | 类型 | 必填 | 默认值 | 备注 |
 | --- | --- | --- | --- | --- |
-| `phone` | string | 是 | 无 | 房东登录账号手机号，主体唯一标识 |
+| `phone` | string | 是 | 无 | 房东登录手机号，主体唯一标识 |
 | `created_by_staff_id` | objectId | 否 | 无 | 后台创建人 |
 | `updated_by_staff_id` | objectId | 否 | 无 | 最近更新人 |
 

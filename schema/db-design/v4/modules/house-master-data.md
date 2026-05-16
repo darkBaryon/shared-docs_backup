@@ -14,7 +14,6 @@
 | 字段 | 类型 | 必填 | 默认值 | 备注 |
 | --- | --- | --- | --- | --- |
 | `project_name` | string | 是 | 无 | 项目名称 |
-| `project_code` | string | 是 | 无 | 项目编码（业务唯一） |
 | `city` | string | 是 | 无 | 城市 |
 | `district` | string | 否 | `""` | 区域 |
 | `address_text` | string | 否 | `""` | 详细地址 |
@@ -22,7 +21,6 @@
 | `brand_name` | string | 否 | `""` | 品牌名称 |
 
 索引：
-- `project_code_1`（唯一）
 - `city_1_status_1`
 
 ### 2.2 `hs_hmd_building`
@@ -33,7 +31,6 @@
 | --- | --- | --- | --- | --- |
 | `project_id` | objectId | 是 | 无 | 关联 `hs_hmd_centralized._id` |
 | `building_name` | string | 是 | 无 | 楼栋名称 |
-| `building_code` | string | 否 | `""` | 楼栋编码 |
 | `floor_total` | int | 否 | `0` | 总层数 |
 | `manager_name` | string | 否 | `""` | 楼栋管家姓名 |
 | `manager_phone` | string | 否 | `""` | 楼栋管家电话 |
@@ -42,7 +39,7 @@
 
 索引：
 - `project_id_1_status_1`
-- `building_code_1`
+- `project_id_1_building_name_1`（唯一，active）
 
 ### 2.3 `hs_hmd_decentralized`
 

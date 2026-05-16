@@ -10,7 +10,7 @@
 handler/v1/{terminal}/{module}
   -> service/{terminal}/{module}
     -> domain/{capability}
-      -> repository/{module-or-terminal_module}
+      -> repository/{data-subdomain}
         -> MongoDB / Redis
 ```
 
@@ -30,8 +30,8 @@ handler/v1/{terminal}/{module}
 
 已确认的 repository 命名依据：
 
-- 按上层接口模块分包。
-- 同名模块跨 terminal 冲突时，加 terminal 前缀，例如 `miniapp_auth`、`publish_auth`。
+- 按底层数据子域分包。
+- repository 包名优先表达实体/collection 语义，例如 `landlord`、`hmd`、`hpd`。
 
 ## 已完成
 
