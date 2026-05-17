@@ -5,7 +5,7 @@
 - 本文档定义房源发布与展示层集合与字段。
 - HPD 不直接等同某一个前端页面；它包含发布主实体和各前端 read model。
 - 当前第一期只落地小程序展示层。
-- 当前第二期开始补发房端/房东端读模型。
+- 当前第二期开始补发房端/房东端读模型和后台管理总览读模型。
 - 公共字段见 [common-fields.md](./common-fields.md)。
 
 ## 2. 设计原则
@@ -18,7 +18,7 @@ HPD 分为两类数据：
 
 按前端/场景拆分的 read model：
   hs_hpd_miniapp_listing
-  hs_hpd_admin_listing       // 后续设计，当前不建
+  hs_hpd_admin_listing
   hs_hpd_publisher_listing
 ```
 
@@ -27,7 +27,7 @@ HPD 分为两类数据：
 - `hs_hpd_listing` 只保存统一 listing identity、来源和发布状态。
 - 小程序列表和详情只读 `hs_hpd_miniapp_listing`。
 - 发房端/房东端读 `hs_hpd_publisher_listing`。
-- 后台管理后续单独设计 read model，不复用小程序展示表。
+- 后台管理读 `hs_hpd_admin_listing`，不复用小程序展示表或发房端读模型。
 - 收藏、足迹、预约、审核、运营推荐等跨模块引用统一使用 `hs_hpd_listing._id`。
 - 不把后台审核字段、运管展示字段、小程序展示字段混在同一个 collection。
 
@@ -102,7 +102,61 @@ HPD 分为两类数据：
 - `is_online_1_rent_mode_1_price_1`
 - `is_online_1_weight_score_-1_updated_at_-1`
 
-### 3.3 `hs_hpd_contact`
+### 3.3 `hs_hpd_admin_listing`
+
+用途：后台管理房源总览 read model。用于承载 admin 房源列表、详情摘要、运营筛选和审核状态浏览所需的聚合字段。
+
+它不是业务主表，不承载后台编辑动作；后台编辑、审核和发布动作仍应落到 HMD / HAC / HPD 主实体，再刷新本 read model。
+
+| 字段 | 类型 | 必填 | 默认值 | 备注 |
+| --- | --- | --- | --- | --- |
+| `listing_id` | objectId | 是 | 无 | 关联 `hs_hpd_listing._id` |
+| `source_type` | string | 是 | 无 | 冗余 `hs_hpd_listing.source_type` |
+| `source_id` | objectId | 是 | 无 | 冗余 `hs_hpd_listing.source_id` |
+| `asset_mode` | string | 是 | 无 | 房源类型：`centralized` / `decentralized` |
+| `owner_landlord_id` | objectId | 是 | 无 | 发房方主体 `hs_lld_landlord._id` |
+| `owner_phone_snapshot` | string | 否 | `""` | 发房方手机号快照 |
+| `landlord_name_snapshot` | string | 否 | `""` | 发房方名称快照；`hs_lld_profile` 未实现前可为空 |
+| `root_type` | string | 是 | 无 | `centralized_project` / `decentralized_community` |
+| `root_id` | objectId | 是 | 无 | 对应 root 主档 ID |
+| `project_id` | objectId | 否 | 无 | 集中式项目 ID |
+| `project_name` | string | 否 | `""` | 集中式项目名 |
+| `building_id` | objectId | 否 | 无 | 楼栋 ID |
+| `building_name` | string | 否 | `""` | 楼栋名 |
+| `room_type_id` | objectId | 否 | 无 | 房型 ID |
+| `room_type_name` | string | 否 | `""` | 房型名 |
+| `decentralized_id` | objectId | 否 | 无 | 分散式小区 ID |
+| `community_name` | string | 否 | `""` | 小区名 |
+| `rent_mode` | string | 是 | 无 | 租住方式 |
+| `city` | string | 是 | 无 | 城市 |
+| `district` | string | 否 | `""` | 区域 |
+| `biz_area` | string | 否 | `""` | 商圈 |
+| `address_text` | string | 否 | `""` | 地址文案 |
+| `room_no` | string | 是 | 无 | 房间号 |
+| `title` | string | 是 | 无 | 后台列表标题 |
+| `price` | int | 是 | `0` | 租金 |
+| `price_text` | string | 否 | `""` | 价格文案 |
+| `layout_text` | string | 否 | `""` | 户型文案 |
+| `area_size` | int | 否 | `0` | 面积 |
+| `room_status` | int | 是 | 无 | HMD 房态 |
+| `listing_status` | int | 是 | 无 | HPD 发布状态 |
+| `audit_status` | int | 是 | `0` | 最近一次上架审核状态；无审核单时为 `0` |
+| `is_online` | int | 是 | `0` | 是否在线：0 否，1 是 |
+| `latest_audit_task_id` | objectId | 否 | 无 | 最近一次上架审核任务 ID |
+| `latest_submitted_at` | int64 | 否 | `0` | 最近一次提交审核时间 |
+| `latest_reviewed_at` | int64 | 否 | `0` | 最近一次审核完成时间 |
+| `reviewer_staff_id` | objectId | 否 | 无 | 最近一次审核人 |
+
+索引：
+
+- `listing_id_1`（唯一）
+- `source_type_1_source_id_1`
+- `owner_landlord_id_1_updated_at_-1`
+- `asset_mode_1_city_1_district_1_updated_at_-1`
+- `listing_status_1_audit_status_1_updated_at_-1`
+- `room_status_1_is_online_1_updated_at_-1`
+
+### 3.4 `hs_hpd_contact`
 
 用途：房源对外联系信息。当前小程序 HPD 第一期不实现完整联系人链路，后续发布/审核流程接入时再落地。
 
@@ -119,7 +173,7 @@ HPD 分为两类数据：
 - `contact_phone_1`
 - `staff_id_1_status_1`
 
-### 3.4 `hs_hpd_publisher_listing`
+### 3.5 `hs_hpd_publisher_listing`
 
 用途：发房端/房东端房源 read model。用于承载 publish 端房源列表、房源详情、状态浏览和后续筛选所需的聚合字段。
 
@@ -185,7 +239,7 @@ HPD 分为两类数据：
 - `decentralized_id_1_updated_at_-1`
 - `room_status_1_listing_status_1_updated_at_-1`
 
-### 3.5 `hs_hpd_root_scope_relation`
+### 3.6 `hs_hpd_root_scope_relation`
 
 用途：房东 root 主档归属关系。用于表达 `project/community -> owner_landlord_id`，支撑 publish 房东端的根作用域判断。
 
@@ -219,6 +273,8 @@ HPD 分为两类数据：
 
 - `hs_hpd_listing.source_type`
 - `hs_hpd_miniapp_listing.source_type`
+- `hs_hpd_admin_listing.source_type`
+- `hs_hpd_publisher_listing.source_type`
 
 ### 4.2 `asset_mode`
 
@@ -231,6 +287,8 @@ HPD 分为两类数据：
 
 - `hs_hpd_listing.asset_mode`
 - `hs_hpd_miniapp_listing.asset_mode`
+- `hs_hpd_admin_listing.asset_mode`
+- `hs_hpd_publisher_listing.asset_mode`
 
 ### 4.3 `listing_status`
 
@@ -247,8 +305,26 @@ HPD 分为两类数据：
 适用字段：
 
 - `hs_hpd_listing.listing_status`
+- `hs_hpd_admin_listing.listing_status`
+- `hs_hpd_publisher_listing.listing_status`
 
-### 4.4 `contact_type`
+### 4.4 `audit_status`
+
+该字段是后台管理 read model 中对 HAC 审核状态的快照，枚举值与 `hs_hac_audit_task.audit_status` 保持一致。
+
+| 值 | 含义 |
+| --- | --- |
+| `0` | 未指定 / 无审核单 |
+| `1` | 待审核 |
+| `2` | 审核通过 |
+| `3` | 审核驳回 |
+| `-1` | 已关闭 |
+
+适用字段：
+
+- `hs_hpd_admin_listing.audit_status`
+
+### 4.5 `contact_type`
 
 | 值 | 含义 |
 | --- | --- |
@@ -260,7 +336,7 @@ HPD 分为两类数据：
 
 - `hs_hpd_contact.contact_type`
 
-### 4.5 `relation_status`
+### 4.6 `relation_status`
 
 | 值 | 含义 |
 | --- | --- |
@@ -277,6 +353,7 @@ HPD 分为两类数据：
 
 - 小程序列表查询主读 `hs_hpd_miniapp_listing`。
 - 小程序详情查询主读 `hs_hpd_miniapp_listing`。
+- 后台管理房源列表和详情摘要主读 `hs_hpd_admin_listing`。
 - 发房端房源列表与详情后续主读 `hs_hpd_publisher_listing`。
 - 小程序接口不直接读取 HMD 集合。
 - `hs_hpd_listing` 不承载前端展示字段，只作为统一 listing identity 和发布状态源。
@@ -286,7 +363,9 @@ HPD 分为两类数据：
 - `hs_hpd_listing.listing_status` 或 HMD `room_status` 变化后，必须刷新 `hs_hpd_miniapp_listing.is_online`。
 - HMD 主数据变化后，必须按来源重建对应 `hs_hpd_miniapp_listing`。
 - HMD 主数据变化后，也必须按来源重建对应 `hs_hpd_publisher_listing`。
-- 后台管理与发房端/房东端 read model 后续单独设计，不从 `hs_hpd_miniapp_listing` 复用字段。
+- HMD 主数据变化后，也必须按来源重建对应 `hs_hpd_admin_listing`。
+- 审核任务状态变化后，必须刷新对应 `hs_hpd_admin_listing.audit_status`、`latest_audit_task_id`、`latest_submitted_at`、`latest_reviewed_at`、`reviewer_staff_id`。
+- 后台管理与发房端/房东端 read model 已拆分，不从 `hs_hpd_miniapp_listing` 复用字段，也不互相复用字段职责。
 - 第一阶段不实现审核/发布动作时，projector 不自动把新房源置为已上架；测试和联调可通过 seed 创建 `listing_status=3` 的 HPD 数据。
 
 ### 5.1 小程序可见性映射
@@ -339,11 +418,45 @@ HPD 分为两类数据：
 | `listing_facilities` | HMD 配置标签 | `listing_facilities` / `room_facilities` | 详情配置展示 |
 | `images` | HMD 房间/房型 | `images` | 房间图片优先，房型图片兜底 |
 
+### 6.3 `hs_hpd_admin_listing` 来源映射
+
+| 字段 | 来源集合 | 来源字段 | 说明 |
+| --- | --- | --- | --- |
+| `listing_id` | `hs_hpd_listing` | `_id` | 统一 listing ID |
+| `source_type` | `hs_hpd_listing` | `source_type` | 冗余来源类型 |
+| `source_id` | `hs_hpd_listing` | `source_id` | 冗余来源 ID |
+| `asset_mode` | `hs_hpd_listing` | `asset_mode` | 冗余房源类型 |
+| `listing_status` | `hs_hpd_listing` | `listing_status` | 发布状态 |
+| `owner_landlord_id` | `hs_hpd_root_scope_relation` | `owner_landlord_id` | 发房方主体 |
+| `owner_phone_snapshot` | `hs_hpd_root_scope_relation` / `hs_lld_landlord` | `owner_phone` / `phone` | 发房方手机号快照 |
+| `landlord_name_snapshot` | `hs_lld_profile` | `landlord_name` | 发房方名称快照；当前可为空 |
+| `root_type` | 系统写入 | - | 由来源集合决定 |
+| `root_id` | HMD 项目/小区 | `_id` | root 主档 ID |
+| `project_id` / `project_name` | `hs_hmd_centralized` | `_id` / `project_name` | 集中式项目 |
+| `building_id` / `building_name` | `hs_hmd_building` | `_id` / `building_name` | 楼栋 |
+| `room_type_id` / `room_type_name` | `hs_hmd_room_type_centralized` | `_id` / `room_type_name` | 集中式房型 |
+| `decentralized_id` / `community_name` | `hs_hmd_decentralized` | `_id` / `community_name` | 分散式小区 |
+| `rent_mode` | HMD 房间集合 | `rent_mode` | 租住方式 |
+| `city` / `district` / `biz_area` | HMD 项目/小区 | 对应字段 | 城市、区域、商圈 |
+| `address_text` | HMD 项目/小区 | `address_text` | 地址 |
+| `room_no` | HMD 房间集合 | `room_no` | 房间号 |
+| `title` | 组装生成 | - | 后台列表标题 |
+| `price` / `price_text` | HMD 房间集合 | `rent` | 租金和展示文案 |
+| `layout_text` / `area_size` | HMD 房间/房型 | 对应字段 | 户型和面积 |
+| `room_status` | HMD 房间集合 | `room_status` | 房态 |
+| `is_online` | `hs_hpd_listing` + HMD 房态 | `listing_status` / `room_status` | 小程序可见状态快照 |
+| `audit_status` | `hs_hac_audit_task` | `audit_status` | 最近一次上架审核状态 |
+| `latest_audit_task_id` | `hs_hac_audit_task` | `_id` | 最近一次上架审核任务 |
+| `latest_submitted_at` | `hs_hac_audit_task` | `submitted_at` | 最近一次提交时间 |
+| `latest_reviewed_at` | `hs_hac_audit_task` | `reviewed_at` | 最近一次审核完成时间 |
+| `reviewer_staff_id` | `hs_hac_audit_task` | `reviewer_staff_id` | 最近一次审核人 |
+
 ## 7. 同步触发规则
 
-- 新建 HMD 房间：创建或复用 `hs_hpd_listing`，并生成 `hs_hpd_miniapp_listing`；不自动上架。
-- 更新 HMD 房间展示字段：重建对应 `hs_hpd_miniapp_listing`。
-- 更新 HMD 父级主数据：fan-out 重建受影响的 `hs_hpd_miniapp_listing`。
-- 更新 `hs_hpd_listing.listing_status`：刷新对应 `hs_hpd_miniapp_listing.is_online`。
-- 更新 HMD `room_status`：刷新对应 `hs_hpd_miniapp_listing.is_online`。
+- 新建 HMD 房间：创建或复用 `hs_hpd_listing`，并生成 `hs_hpd_miniapp_listing`、`hs_hpd_publisher_listing`、`hs_hpd_admin_listing`；不自动上架。
+- 更新 HMD 房间展示字段：重建对应 `hs_hpd_miniapp_listing`、`hs_hpd_publisher_listing`、`hs_hpd_admin_listing`。
+- 更新 HMD 父级主数据：fan-out 重建受影响的 `hs_hpd_miniapp_listing`、`hs_hpd_publisher_listing`、`hs_hpd_admin_listing`。
+- 更新 `hs_hpd_listing.listing_status`：刷新对应 read model 的 `listing_status` 和 `is_online`。
+- 更新 HMD `room_status`：刷新对应 read model 的 `room_status` 和 `is_online`。
+- 更新 `hs_hac_audit_task.audit_status`：刷新对应 `hs_hpd_admin_listing` 的审核快照字段。
 - 删除或软删除 HMD 来源对象：关闭小程序展示；是否同步变更 `hs_hpd_listing.listing_status` 由发布/管理流程决定。

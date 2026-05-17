@@ -26,13 +26,10 @@
 ## C. 发布与展示（hpd）
 - `hs_hpd_listing`：发布主实体 / 统一 listing identity
 - `hs_hpd_miniapp_listing`：小程序检索与展示 read model
+- `hs_hpd_admin_listing`：后台管理房源总览 read model
 - `hs_hpd_contact`：对外联系信息（后续接入）
 - `hs_hpd_root_scope_relation`：房东 root 主档归属关系
 - `hs_hpd_publisher_listing`：发房端/房东端房源 read model
-
-后续按端独立设计：
-
-- `hs_hpd_admin_listing`：后台管理 read model，当前不建
 
 ## D. 审核与变更（hac）
 - `hs_hac_audit_task`：上架审核任务

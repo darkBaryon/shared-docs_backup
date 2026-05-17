@@ -10,5 +10,5 @@
 
 当前已补：
 
+- [admin/index.md](./admin/index.md)
 - [publish/index.md](./publish/index.md)
-

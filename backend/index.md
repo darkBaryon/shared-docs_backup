@@ -14,4 +14,5 @@
 - [repository.md](./repository.md)：repository 约定。
 - [validation.md](./validation.md)：model enum 与 validation 约定。
 - [local-dev.md](./local-dev.md)：本地启动与验证。
+- [ci.md](./ci.md)：Go 后端 CI 约定。
 - [seed-data.md](./seed-data.md)：测试数据脚本。

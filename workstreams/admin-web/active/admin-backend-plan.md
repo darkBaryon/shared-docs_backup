@@ -106,6 +106,10 @@ internal/service/admin/auth/types.go
 
 #### `login`
 
+接口文档：
+
+- `shared-docs/backend/interfaces/admin/admin_auth_login.md`
+
 请求：
 
 - `phone`
@@ -130,6 +134,10 @@ handler/admin/auth
 
 #### `session`
 
+接口文档：
+
+- `shared-docs/backend/interfaces/admin/admin_auth_session.md`
+
 请求：
 
 - 无 body 或空对象
@@ -150,6 +158,10 @@ middleware auth
 
 #### `logout`
 
+接口文档：
+
+- `shared-docs/backend/interfaces/admin/admin_auth_logout.md`
+
 处理链：
 
 ```text
@@ -159,6 +171,10 @@ handler -> service/admin/auth.Logout -> session.Store.Delete
 #### `reset_password`
 
 第一阶段后移，不进入首批实现。
+
+接口文档：
+
+- `shared-docs/backend/interfaces/admin/admin_auth_reset_password.md`
 
 ### 3.2 `staff`
 
@@ -179,7 +195,38 @@ internal/service/admin/staff/service.go
 internal/service/admin/staff/types.go
 ```
 
+#### `create`
+
+接口文档：
+
+- `shared-docs/backend/interfaces/admin/staff_create.md`
+
+请求：
+
+- `name`
+- `phone`
+- `password`
+- `email`
+- `department`
+- `job_title`
+- `contact_qr_code`
+- `role_ids`
+
+处理链：
+
+```text
+handler
+  -> service/admin/staff.Create
+    -> repository/staff.Create
+    -> repository/staff_auth.CreatePasswordAuth
+    -> repository/staff_role.ReplaceByStaffID
+```
+
 #### `list`
+
+接口文档：
+
+- `shared-docs/backend/interfaces/admin/staff_list.md`
 
 筛选项：
 
@@ -203,6 +250,10 @@ handler -> service/admin/staff.List -> repository/staff.List
 
 #### `detail`
 
+接口文档：
+
+- `shared-docs/backend/interfaces/admin/staff_detail.md`
+
 返回：
 
 - 员工基础信息
@@ -210,31 +261,19 @@ handler -> service/admin/staff.List -> repository/staff.List
 - 创建人
 - 登录信息
 
-#### `create`
-
-请求：
-
-- `name`
-- `phone`
-- `password`
-- `contact_qr`
-- `role_ids`
-
-处理链：
-
-```text
-handler
-  -> service/admin/staff.Create
-    -> repository/staff.Create
-    -> repository/staff_role.ReplaceByStaffID
-```
-
 #### `update`
+
+接口文档：
+
+- `shared-docs/backend/interfaces/admin/staff_update.md`
 
 可修改：
 
 - `name`
-- `contact_qr`
+- `email`
+- `department`
+- `job_title`
+- `contact_qr_code`
 - `role_ids`
 - `status`
 
@@ -243,6 +282,10 @@ handler
 - `phone`
 
 #### `disable`
+
+接口文档：
+
+- `shared-docs/backend/interfaces/admin/staff_disable.md`
 
 作用：
 
@@ -474,7 +517,7 @@ internal/service/admin/launchaudit/types.go
 
 第一阶段预计新增：
 
-- `internal/repository/admin_auth` 或继续复用现有 staff/role/permission repository
+- `internal/repository/adm` 继续承载 `hs_adm_*` 集合读写
 - 发房方业务资料 repository
 - 上架审核单 repository
 

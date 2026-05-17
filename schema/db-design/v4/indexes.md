@@ -15,6 +15,7 @@
 - `hs_adm_role_permission`: `role_id_1_permission_id_1`
 - `hs_hpd_listing`: `source_type_1_source_id_1`
 - `hs_hpd_miniapp_listing`: `listing_id_1`
+- `hs_hpd_admin_listing`: `listing_id_1`
 - `hs_hpd_publisher_listing`: `listing_id_1`
 - `hs_hpd_root_scope_relation`: `root_type_1_root_id_1_active_unique`（partial：`status=1 && relation_status=1`）
 - `hs_usr_favorite`: `user_id_1_listing_id_1`
@@ -31,6 +32,11 @@
   - `owner_landlord_id_1_updated_at_-1`
   - `root_type_1_root_id_1_updated_at_-1`
   - `room_status_1_listing_status_1_updated_at_-1`
+- `hs_hpd_admin_listing`:
+  - `owner_landlord_id_1_updated_at_-1`
+  - `asset_mode_1_city_1_district_1_updated_at_-1`
+  - `listing_status_1_audit_status_1_updated_at_-1`
+  - `room_status_1_is_online_1_updated_at_-1`
 - `hs_usr_favorite`:
   - `user_id_1_status_1_updated_at_-1`
 - `hs_usr_history`:

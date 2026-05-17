@@ -38,6 +38,11 @@ handler/v1/{terminal}/{module}
 - 基础设施：配置读取、Mongo、Redis、Redis session token、repository common 基础能力。
 - 小程序 auth：`wechat_login`、`wechat_register`、`session`。
 - Publish 第一阶段：HMD 写链路、HPD projector、真实服务联调。
+- Admin Auth 第一阶段：`admin_auth/login`、`admin_auth/session`、`admin_auth/logout` 已实现，员工手机号密码登录、角色权限回填、Redis session 恢复与退出已接通。
+- Admin Staff 第一阶段：`staff/create`、`staff/list`、`staff/detail`、`staff/update`、`staff/disable` 已实现，支持创建员工主体、密码认证、角色关系、员工列表分页查询、员工详情查看、员工资料维护、角色替换、员工禁用和 `staff.edit/staff.view` 权限校验。
+- Admin Role 第一阶段：`role/list`、`role/detail`、`role/create`、`role/update` 已实现，支持角色分页查询、详情查看、角色创建、角色编辑、权限关系维护、权限变更后员工 admin token 失效和 `role.view/role.edit` 权限校验。
+- Admin Provider 第一阶段：`provider/list`、`provider/detail`、`provider/create`、`provider/update`、`provider/disable` 已实现，支持发房方账号列表、详情、创建、手机号修改、禁用、非事务创建补偿、publish token 失效和 `provider.view/provider.edit` 权限校验；当前阶段不写 `hs_lld_profile`。
+- 基础 CI：GitHub Actions 已接入 `gofmt -l .`、`go test ./...`、`go build ./...`，真实 Mongo / Redis 集成测试仍默认跳过。
 - HPD 小程序展示层：`search`、`public_detail`。
 - 小程序用户资料、收藏、足迹：profile、dashboard、favorite、history。
 - 小程序 `public_detail` 可选登录：匿名返回 `is_favorited=false`，有效 token 返回真实收藏状态，无效 token 按匿名处理。

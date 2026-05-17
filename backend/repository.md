@@ -17,6 +17,7 @@
 ## 当前口径
 
 - `internal/repository/landlord`：房东身份与认证数据，承载 `hs_lld_landlord` / `hs_lld_auth` 的底层查询。
+- `internal/repository/adm`：后台员工、角色、权限和登录审计数据，承载 `hs_adm_*` 集合的底层读写。
 - `internal/repository/hmd`：房源主数据六个模块的底层读写。
 - `internal/repository/hpd`：发布/展示域数据与 root owner scope relation。
 - `internal/repository/favorite`、`history`：当前仍按独立 collection 能力维护，后续如果 user-behavior 子域扩大，再统一收目录。

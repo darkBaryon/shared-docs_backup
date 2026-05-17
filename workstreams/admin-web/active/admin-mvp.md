@@ -6,6 +6,9 @@
 
 - 后端详细计划：`admin-backend-plan.md`
 - 前端详细计划：`admin-frontend-plan.md`
+- 角色权限需求：`role-requirements.md`
+- 发房方管理需求：`provider-requirements.md`
+- 房源管理需求：`house-requirements.md`
 
 当前补充约束：
 
@@ -181,6 +184,10 @@ handler/v1/admin/{module}
 - `staff`
 - `role`
 
+角色权限详细需求：
+
+- `role-requirements.md`
+
 完成标志：
 
 - 员工可登录后台
@@ -201,6 +208,10 @@ handler/v1/admin/{module}
 
 - `provider`
 
+发房方管理详细需求：
+
+- `provider-requirements.md`
+
 完成标志：
 
 - 平台可以独立维护发房方资料
@@ -220,9 +231,13 @@ handler/v1/admin/{module}
 
 - `house`
 
+房源管理详细需求：
+
+- `house-requirements.md`
+
 完成标志：
 
-- 运营可以按来源、发房方、项目、类型筛选全量房源
+- 运营可以按发房方、资产类型、城市区域、房态、发布状态、审核状态筛选全量房源
 - 可以稳定查看房源当前状态和审核状态
 
 ### Phase 4：房源审核
