@@ -48,10 +48,18 @@
 - [POST /api/v1/provider/update](./provider_update.md)
 - [POST /api/v1/provider/disable](./provider_disable.md)
 
-## `house`
+## `house_root`
 
-- [POST /api/v1/house/list](./house_list.md)
-- [POST /api/v1/house/detail](./house_detail.md)
+- [POST /api/v1/house_root/list](./house_root_list.md)
+
+## `house_building`
+
+- [POST /api/v1/house_building/list](./house_building_list.md)
+
+## `house_room`
+
+- [POST /api/v1/house_room/list](./house_room_list.md)
+- [POST /api/v1/house_room/detail](./house_room_detail.md)
 
 ## 当前实现顺序
 
@@ -74,10 +82,12 @@
 15. `provider/create`
 16. `provider/update`
 17. `provider/disable`
-18. `house/list`
-19. `house/detail`
+18. `house_root/list`
+19. `house_building/list`
+20. `house_room/list`
+21. `house_room/detail`
 
 后移：
 
 - `admin_auth/reset_password`
-- `house/export`
+- `house_room/export`

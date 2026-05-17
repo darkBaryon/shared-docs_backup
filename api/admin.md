@@ -16,7 +16,8 @@
 - 路径统一使用 `POST /api/v1/{module}/{action}`。
 - 不直接复用 publish 端接口作为 admin 端接口。
 - 接口动作围绕后台业务动作命名，而不是围绕底层集合命名。
-- `auth` 因 miniapp 已占用 `/auth/session`，当前保留为 `admin_auth` 例外；其它 admin 模块不加 terminal 前缀。
+- `auth` 因 miniapp 已占用 `/auth/session`，当前保留为 `admin_auth` 例外。
+- 后台房源管理不再复用 miniapp 的 `house` 模块名，拆成 `house_root`、`house_building`、`house_room`，避免三端语义冲突。
 
 ## 第一阶段模块
 
@@ -26,8 +27,10 @@
 2. `staff`
 3. `role`
 4. `provider`
-5. `house`
-6. `launch_audit`
+5. `house_root`
+6. `house_building`
+7. `house_room`
+8. `launch_audit`
 
 ### `admin_auth`
 
@@ -518,15 +521,85 @@ Authorization: Bearer <token>
 - `name`、城市、图片、资质、品牌等资料依赖 `hs_lld_profile`，当前阶段不进入实现，不得塞进 `hs_lld_landlord` 或 `hs_usr_user`。
 - 修改手机号或禁用发房方后，后端会失效该发房方旧 publish token。
 
-### `house`
+### `house_root`
 
-- `POST /api/v1/house/list`
-- `POST /api/v1/house/detail`
+- `POST /api/v1/house_root/list`
 
 #### `list`
 
 请求：
 
+- `provider_id`
+- `asset_mode`
+- `city`
+- `district`
+- `room_status`
+- `listing_status`
+- `audit_status`
+- `page`
+- `page_size`
+
+响应：
+
+- `list`
+  - `root_id`
+  - `root_type`
+  - `root_name`
+  - `asset_mode`
+  - `provider_id`
+  - `provider_phone`
+  - `provider_name`
+  - `project_id`
+  - `project_name`
+  - `community_id`
+  - `community_name`
+  - `city`
+  - `district`
+  - `biz_area`
+  - `building_count`
+  - `room_count`
+  - `updated_at`
+
+### `house_building`
+
+- `POST /api/v1/house_building/list`
+
+#### `list`
+
+请求：
+
+- `root_id`
+- `room_status`
+- `listing_status`
+- `audit_status`
+- `page`
+- `page_size`
+
+响应：
+
+- `list`
+  - `root_id`
+  - `building_id`
+  - `project_id`
+  - `project_name`
+  - `building_name`
+  - `city`
+  - `district`
+  - `biz_area`
+  - `room_count`
+  - `updated_at`
+
+### `house_room`
+
+- `POST /api/v1/house_room/list`
+- `POST /api/v1/house_room/detail`
+
+#### `list`
+
+请求：
+
+- `root_id`
+- `building_id`
 - `provider_id`
 - `asset_mode`
 - `city`
@@ -560,9 +633,6 @@ Authorization: Bearer <token>
   - `audit_status`
   - `is_online`
   - `updated_at`
-- `page`
-- `page_size`
-- `total`
 
 #### `detail`
 
@@ -572,7 +642,7 @@ Authorization: Bearer <token>
 
 响应：
 
-- `house`
+- `room`
   - 字段同列表项
   - `source_type`
   - `source_id`
@@ -592,9 +662,9 @@ Authorization: Bearer <token>
 
 说明：
 
-- 第一阶段 `house` 只做运营视角查看，不做后台直接改服务信息或联系人。
-- 房源列表和详情读取 `hs_hpd_admin_listing`，该 collection 是管理后台房源总览 read model。
-- `house/export` 不进入第一批实现，后续需要先补需求和接口文档。
+- 后台房源管理首页改为项目/小区列表，不再直接平铺房间。
+- 房间列表和详情读取 `hs_hpd_admin_listing`，该 collection 是管理后台房源总览 read model。
+- `house_room/export` 不进入第一批实现，后续需要先补需求和接口文档。
 
 ### `launch_audit`
 
